@@ -6,5 +6,12 @@ namespace AssetGuard.DataAccess.Abstract
     {
         List<Employee> GetAll();
         Employee GetById(int id);
+
+
+
+        // --- Personellere Eklenen CRUD İmzaları ---
+        void Add(Employee entity);
+        void Update(Employee entity);
+        void Delete(Employee entity);
     }
 }

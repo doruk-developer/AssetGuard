@@ -1,5 +1,50 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using AssetGuard.Entity
+@model List<Employee>
+
 @{
+    ViewData["Title"] = "Personel Listesi";
 }
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Aktif Personel Kayıtları</h3>
+        <div class="card-tools">
+            <a href="/Employee/Create" class="btn btn-primary btn-sm">
+                <i class="fas fa-user-plus"></i> Yeni Personel Ekle
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        <table class="table table-striped projects table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 5%">ID</th>
+                    <th style="width: 25%">Ad Soyad</th>
+                    <th style="width: 20%">Departman</th>
+                    <th style="width: 15%">Durum</th>
+                    <th style="width: 20%">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td><strong>@item.FirstName @item.LastName</strong></td>
+                        <td><span class="badge badge-secondary">@item.Department.Name</span></td>
+                        <td><span class="badge badge-success">Aktif</span></td> <!-- Zimmet Durumu Eklenecek -->
+                        <td class="project-actions text-right">
+                            <a class="btn btn-info btn-sm" href="/Employee/Edit/@item.Id">
+                                <i class="fas fa-pencil-alt"></i> Düzenle
+                            </a>
+                            <a class="btn btn-danger btn-sm" href="/Employee/Delete/@item.Id" onclick="return confirm('Bu personeli silmek istediğinize emin misiniz?');">
+                                <i class="fas fa-trash"></i> Sil
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

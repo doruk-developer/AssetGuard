@@ -1,13 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AssetGuard.Business.Abstract;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AssetGuard.WebUI.Controllers
 {
     public class DepartmentController : Controller
     {
-        // Departman Listesi
+        private readonly IDepartmentService _departmentService;
+
+        public DepartmentController(IDepartmentService departmentService)
+        {
+            _departmentService = departmentService;
+        }
+
         public IActionResult Index()
         {
-            return View();
+            var values = _departmentService.TGetAll();
+            return View(values);
         }
     }
 }
