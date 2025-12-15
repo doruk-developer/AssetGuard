@@ -1,0 +1,67 @@
+﻿@*
+    Zimmet atama formu olarak gösterilecek View
+*@
+
+@model AssetGuard.WebUI.Models.AssignmentAddViewModel
+
+@{
+    ViewData["Title"] = "Zimmet Ata";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <!-- Form Başlangıcı: method="post" çok önemli -->
+        <form method="post">
+            <div class="card card-success">
+                <div class="card-header">
+                    <h3 class="card-title">Zimmet Atama İşlemi</h3>
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+                        <!-- ÜRÜN SEÇİMİ -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Zimmetlenecek Ürün</label>
+                                <!-- Seçilen ID, Assignment.AssetId içine gidecek -->
+                                <select class="form-control" asp-for="Assignment.AssetId">
+                                    <option value="">-- Seçiniz --</option>
+                                    @foreach (var item in Model.AssetList)
+                                    {
+                                        <option value="@item.Id">@item.AssetName (@item.SerialNo)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- PERSONEL SEÇİMİ -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Teslim Alacak Personel</label>
+                                <!-- Seçilen ID, Assignment.EmployeeId içine gidecek -->
+                                <select class="form-control" asp-for="Assignment.EmployeeId">
+                                    <option value="">-- Seçiniz --</option>
+                                    @foreach (var item in Model.EmployeeList)
+                                    {
+                                        <option value="@item.Id">@item.FirstName @item.LastName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NOT ALANI -->
+                    <div class="form-group">
+                        <label>Notlar (Opsiyonel)</label>
+                        <textarea class="form-control" asp-for="Assignment.Notes" rows="3" placeholder="Örn: Mouse ve çanta ile teslim edildi."></textarea>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success">Zimmeti Kaydet</button>
+                    <a href="/" class="btn btn-secondary">İptal</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

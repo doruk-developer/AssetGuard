@@ -1,0 +1,143 @@
+﻿<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="/" class="brand-link">
+        <img src="~/dist/img/AdminLTELogo.png" alt="AssetGuard Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-light">AssetGuard</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Kullanıcı Paneli -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img src="~/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block">Süper Admin</a>
+            </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+                <!-- 1. DASHBOARD (Tekil Link) -->
+                <li class="nav-item">
+                    <a href="/" class="nav-link active">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Genel Bakış</p>
+                    </a>
+                </li>
+
+                <li class="nav-header">OPERASYON</li>
+
+                <!-- 2. ENVANTER YÖNETİMİ -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-laptop"></i>
+                        <p>
+                            Demirbaş Yönetimi
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <!-- AssetController'ın Index Action'ına gider -->
+                            <a href="/Asset/Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Tüm Demirbaşlar</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <!-- Yeni ekleme sayfası -->
+                            <a href="/Asset/Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Yeni Demirbaş Ekle</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <!-- Kategoriler ayrı bir tablo olduğu için ayrı Controller -->
+                            <a href="/Category/Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Kategoriler</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- 3. ZİMMET İŞLEMLERİ -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-handshake"></i>
+                        <p>
+                            Zimmet Hareketleri
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/Assignment/Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Zimmet Ata</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Assignment/Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Geçmiş Hareketler</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-header">KURUMSAL</li>
+
+                <!-- 4. PERSONEL YÖNETİMİ -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>
+                            Personel & Departman
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/Employee/Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Personel Listesi</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Department/Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Departmanlar</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- 5. RAPORLAR (Tekil) -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-chart-pie"></i>
+                        <p>Raporlar</p>
+                    </a>
+                </li>
+
+                <li class="nav-header">SİSTEM</li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-cogs"></i>
+                        <p>Ayarlar</p>
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+</aside>

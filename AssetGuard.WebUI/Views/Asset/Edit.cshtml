@@ -1,0 +1,89 @@
+﻿@model AssetGuard.WebUI.Models.AssetAddViewModel
+
+@{
+    ViewData["Title"] = "Demirbaş Düzenle";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-warning">
+            <!-- Düzenleme olduğu için Sarı (Warning) renk -->
+            <div class="card-header">
+                <h3 class="card-title">Demirbaş Düzenleme Formu</h3>
+            </div>
+
+            <form method="post">
+                <div class="card-body">
+
+                    <!-- !!! ÇOK ÖNEMLİ: Hangi ID'yi güncellediğimizi tutan GİZLİ ALAN !!! -->
+                    <!-- Bu olmazsa sistem yeni kayıt sanar veya hata verir -->
+                    <input type="hidden" asp-for="Asset.Id" />
+
+                    <!-- 1. Ürün Adı -->
+                    <div class="form-group">
+                        <label>Ürün Adı</label>
+                        <input type="text" class="form-control" asp-for="Asset.AssetName">
+                    </div>
+
+                    <!-- 2. Seri No -->
+                    <div class="form-group">
+                        <label>Seri Numarası</label>
+                        <input type="text" class="form-control" asp-for="Asset.SerialNo">
+                    </div>
+
+                    <div class="row">
+                        <!-- 3. Kategori -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select class="form-control" asp-for="Asset.CategoryId">
+                                    @foreach (var item in Model.CategoryList)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 4. Durum -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Durumu</label>
+                                <select class="form-control" asp-for="Asset.StatusId">
+                                    @foreach (var item in Model.StatusList)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- 5. Fiyat -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fiyat (TL)</label>
+                                <input type="number" step="0.01" class="form-control" asp-for="Asset.Price">
+                            </div>
+                        </div>
+
+                        <!-- 6. Tarih -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Alım Tarihi</label>
+                                <input type="date" class="form-control" asp-for="Asset.PurchaseDate">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-warning">Güncelle</button>
+                    <a href="/Asset/Index" class="btn btn-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+﻿@*
+    Atamaları görüntülememizi sağlayan Index sayfasıdır.
+*@
+
+
+@using AssetGuard.Entity
+@model List<Assignment>
+
+@{
+    ViewData["Title"] = "Zimmet Hareket Geçmişi";
+}
+
+<div class="card">
+    <div class="card-header border-transparent">
+        <h3 class="card-title">Tüm Zimmet Kayıtları</h3>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table m-0 table-hover">
+                <thead>
+                    <tr>
+                        <th>Hareket ID</th>
+                        <th>Personel</th>
+                        <th>Ürün / Seri No</th>
+                        <th>Veriliş Tarihi</th>
+                        <th>İade Durumu</th>
+                        <th>Notlar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>#@item.Id</td>
+                            <td><strong>@item.Employee?.FirstName @item.Employee?.LastName</strong></td>
+                            <td>@item.Asset?.AssetName <small class="text-muted">(@item.Asset?.SerialNo)</small></td>
+                            <td>@item.AssignedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                @if (item.ReturnDate == null)
+                                {
+                                    <span class="badge badge-success">Aktif Zimmet</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-secondary">İade Edildi (@item.ReturnDate?.ToString("dd.MM.yyyy"))</span>
+                                }
+                            </td>
+                            <td>@item.Notes</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

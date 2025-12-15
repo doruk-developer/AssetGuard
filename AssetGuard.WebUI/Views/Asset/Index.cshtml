@@ -1,0 +1,74 @@
+﻿@*Bu Index bir operasyonel Liste (Detail View)dir. Amacı veri tabanındaki her kaydı tek tek, detaylı ve yönetilebilir bir tabloda göstermek.*@
+
+@using AssetGuard.Entity
+@model List<Asset>
+
+@{
+    ViewData["Title"] = "Demirbaş Listesi";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Demirbaş Envanter Listesi</h3>
+        <div class="card-tools">
+            <a href="/Asset/Create" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Yeni Giriş
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        <table class="table table-striped projects">
+            <thead>
+                <tr>
+                    <th style="width: 5%">ID</th>
+                    <th style="width: 25%">Ürün Adı</th>
+                    <th style="width: 15%">Kategori</th>
+                    <th>Seri No</th>
+                    <th>Fiyat</th>
+                    <th class="text-center">Durum</th>
+                    <th style="width: 20%">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>
+                            <strong>@item.AssetName</strong><br />
+                            <small class="text-muted">Alım: @item.PurchaseDate.ToString("dd.MM.yyyy")</small>
+                        </td>
+                        <td>
+                            <!-- GÜVENLİ KOD: Soru işareti (?) ile null kontrolü -->
+                            <span class="badge badge-info">@item.Category?.Name</span>
+                        </td>
+                        <td>@item.SerialNo</td>
+                        <td>₺ @item.Price.ToString("N0")</td>
+                        <td class="text-center">
+                            @{
+                                // Durum boşsa 'Bilinmiyor' yazsın, çökmesin.
+                                var status = item.Status?.Name ?? "Bilinmiyor";
+                                var badgeColor = status == "Sağlam" ? "success" : (status == "Hurda" ? "danger" : "warning");
+                            }
+                            <span class="badge badge-@badgeColor">@status</span>
+                        </td>
+                        <td class="project-actions text-right">
+                            <!-- DÜZENLEME BUTONU -->
+                            <!-- href="#" yerine ilgili ID'ye giden linki veriyoruz -->
+                            <a class="btn btn-info btn-sm" href="/Asset/Edit/@item.Id">
+                                <i class="fas fa-pencil-alt"></i> Düzenle
+                            </a>
+
+                            <!-- SİLME BUTONU -->
+                            <!-- Hem linki veriyoruz hem de basit bir onay kutusu (JavaScript) ekliyoruz -->
+                            <a class="btn btn-danger btn-sm" href="/Asset/Delete/@item.Id" onclick="return confirm('Bu demirbaşı silmek istediğinize emin misiniz?');">
+                                <i class="fas fa-trash"></i> Sil
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
