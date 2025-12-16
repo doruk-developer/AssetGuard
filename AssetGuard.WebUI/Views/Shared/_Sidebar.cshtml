@@ -8,7 +8,7 @@
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <!-- Kullanıcı Paneli -->
+        <!-- Sidebar user panel -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
                 <img src="~/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
@@ -22,51 +22,42 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
-                <!-- 1. DASHBOARD (Tekil Link) -->
+                <!-- 1. GENEL -->
                 <li class="nav-item">
-                    <a href="/" class="nav-link active">
+                    <a href="/" class="nav-link">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Genel Bakış</p>
                     </a>
                 </li>
 
-                <li class="nav-header">OPERASYON</li>
+                <li class="nav-header">OPERASYONEL YÖNETİM</li>
 
-                <!-- 2. ENVANTER YÖNETİMİ -->
+                <!-- 2. DEMİRBAŞ YÖNETİMİ -->
                 <li class="nav-item">
                     <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-laptop"></i>
+                        <i class="nav-icon fas fa-boxes"></i>
                         <p>
-                            Demirbaş Yönetimi
+                            Demirbaş İşlemleri
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <!-- AssetController'ın Index Action'ına gider -->
                             <a href="/Asset/Index" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Tüm Demirbaşlar</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <!-- Yeni ekleme sayfası -->
                             <a href="/Asset/Create" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Yeni Demirbaş Ekle</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <!-- Kategoriler ayrı bir tablo olduğu için ayrı Controller -->
-                            <a href="/Category/Index" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Kategoriler</p>
+                                <p>Yeni Giriş Yap</p>
                             </a>
                         </li>
                     </ul>
                 </li>
 
-                <!-- 3. ZİMMET İŞLEMLERİ -->
+                <!-- 3. ZİMMET YÖNETİMİ -->
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-handshake"></i>
@@ -85,20 +76,18 @@
                         <li class="nav-item">
                             <a href="/Assignment/Index" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Geçmiş Hareketler</p>
+                                <p>Hareket Geçmişi</p>
                             </a>
                         </li>
                     </ul>
                 </li>
-
-                <li class="nav-header">KURUMSAL</li>
 
                 <!-- 4. PERSONEL YÖNETİMİ -->
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-users"></i>
                         <p>
-                            Personel & Departman
+                            Personel Yönetimi
                             <i class="right fas fa-angle-left"></i>
                         </p>
                     </a>
@@ -110,27 +99,58 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/Department/Index" class="nav-link">
+                            <a href="/Employee/Create" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Departmanlar</p>
+                                <p>Yeni Personel</p>
                             </a>
                         </li>
                     </ul>
                 </li>
 
-                <!-- 5. RAPORLAR (Tekil) -->
+                <li class="nav-header">SİSTEM VE AYARLAR</li>
+
+                <!-- 5. SİSTEM TANIMLARI (HEPSİ BURADA) -->
                 <li class="nav-item">
                     <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-cogs"></i>
+                        <p>
+                            Sistem Tanımları
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="/Category/Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Kategoriler</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/Department/Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Departmanlar</p>
+                            </a>
+                        </li>
+                        <!-- İŞTE EKSİK OLAN LİNK: -->
+                        <li class="nav-item">
+                            <a href="/AssetStatus/Index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Demirbaş Durumları</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- 6. DİĞERLERİ -->
+                <li class="nav-item">
+                    <a href="/Report/Index" class="nav-link">
                         <i class="nav-icon fas fa-chart-pie"></i>
                         <p>Raporlar</p>
                     </a>
                 </li>
-
-                <li class="nav-header">SİSTEM</li>
-
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-cogs"></i>
+                    <a href="/Settings/Index" class="nav-link">
+                        <i class="nav-icon fas fa-tools"></i>
                         <p>Ayarlar</p>
                     </a>
                 </li>

@@ -1,0 +1,65 @@
+﻿@model AssetGuard.Entity.AssetStatus
+@{
+    ViewData["Title"] = "Yeni Durum Ekle";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-primary">
+            <div class="card-header"><h3 class="card-title">Demirbaş Durumu Ekle</h3></div>
+            <form method="post">
+                <div class="card-body">
+                    
+                    <div class="form-group">
+                        <label>Durum Adı</label>
+                        <input type="text" class="form-control" asp-for="Name" placeholder="Örn: Serviste">
+                    </div>
+
+                    <!-- Renk Seçimi Paneli -->
+
+                    <div class="form-group">
+                        <label>Renk Seçiniz</label>
+                        <div class="d-flex flex-wrap" style="gap: 10px;">
+
+                            <!-- YEŞİL -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="ColorClass" value="success" checked>
+                                <label class="form-check-label"><span class="badge badge-success">Yeşil (İyi)</span></label>
+                            </div>
+
+                            <!-- SARI -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="ColorClass" value="warning">
+                                <label class="form-check-label"><span class="badge badge-warning">Sarı (Uyarı)</span></label>
+                            </div>
+
+                            <!-- KIRMIZI -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="ColorClass" value="danger">
+                                <label class="form-check-label"><span class="badge badge-danger">Kırmızı (Kritik)</span></label>
+                            </div>
+
+                            <!-- MAVİ -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="ColorClass" value="primary">
+                                <label class="form-check-label"><span class="badge badge-primary">Mavi (Normal)</span></label>
+                            </div>
+
+                            <!-- SİYAH -->
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" asp-for="ColorClass" value="dark">
+                                <label class="form-check-label"><span class="badge badge-dark">Siyah (Pasif)</span></label>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success">Kaydet</button>
+                    <a href="/AssetStatus/Index" class="btn btn-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
