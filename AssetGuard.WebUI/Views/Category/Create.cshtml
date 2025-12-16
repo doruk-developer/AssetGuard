@@ -1,0 +1,24 @@
+﻿@model AssetGuard.Entity.Category
+@{
+    ViewData["Title"] = "Yeni Kategori";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-primary">
+            <div class="card-header"><h3 class="card-title">Kategori Ekle</h3></div>
+            <form method="post">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Kategori Adı</label>
+                        <input type="text" class="form-control" asp-for="Name" placeholder="Örn: Tabletler">
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success">Kaydet</button>
+                    <a href="/Category/Index" class="btn btn-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

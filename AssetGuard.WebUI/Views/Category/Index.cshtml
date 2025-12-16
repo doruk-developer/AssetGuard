@@ -1,5 +1,46 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using AssetGuard.Entity
+@model List<Category>
+
 @{
+    ViewData["Title"] = "Kategori Yönetimi";
 }
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">Tüm Kategoriler</h3>
+        <div class="card-tools">
+            <a href="/Category/Create" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Yeni Kategori Ekle
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+        <table class="table table-striped projects table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 10%">ID</th>
+                    <th style="width: 70%">Kategori Adı</th>
+                    <th style="width: 20%">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td><strong>@item.Name</strong></td>
+                        <td class="project-actions text-right">
+                            <a class="btn btn-info btn-sm" href="/Category/Edit/@item.Id">
+                                <i class="fas fa-pencil-alt"></i> Düzenle
+                            </a>
+                            <a class="btn btn-danger btn-sm" href="/Category/Delete/@item.Id" onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?');">
+                                <i class="fas fa-trash"></i> Sil
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -10,5 +10,11 @@ namespace AssetGuard.Business.Concrete
         public CategoryManager(ICategoryDal categoryDal) { _categoryDal = categoryDal; }
 
         public List<Category> TGetAll() { return _categoryDal.GetAll(); }
+
+
+        public void TAdd(Category entity) { _categoryDal.Add(entity); }
+        public void TDelete(Category entity) { _categoryDal.Delete(entity); }
+        public void TUpdate(Category entity) { _categoryDal.Update(entity); }
+        public Category TGetById(int id) { return _categoryDal.GetById(id); }
     }
 }
