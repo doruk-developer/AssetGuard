@@ -13,5 +13,26 @@ namespace AssetGuard.DataAccess.Concrete
         public EfDepartmentDal(ZimmetContext context) { _context = context; }
 
         public List<Department> GetAll() { return _context.Departments.ToList(); }
+
+        // --- YENİ EKLENENLER ---
+        public void Add(Department entity)
+        {
+            _context.Add(entity);
+            _context.SaveChanges();
+        }
+        public void Delete(Department entity)
+        {
+            _context.Remove(entity);
+            _context.SaveChanges();
+        }
+        public void Update(Department entity)
+        {
+            _context.Update(entity);
+            _context.SaveChanges();
+        }
+        public Department GetById(int id)
+        {
+            return _context.Departments.Find(id);
+        }
     }
 }

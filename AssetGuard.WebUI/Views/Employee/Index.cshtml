@@ -35,10 +35,15 @@
                         <td><span class="badge badge-secondary">@item.Department.Name</span></td>
                         <td><span class="badge badge-success">Aktif</span></td> <!-- Zimmet Durumu Eklenecek -->
                         <td class="project-actions text-right">
+                            <!-- (Personel) Düzenleme Linki -->
                             <a class="btn btn-info btn-sm" href="/Employee/Edit/@item.Id">
                                 <i class="fas fa-pencil-alt"></i> Düzenle
                             </a>
-                            <a class="btn btn-danger btn-sm" href="/Employee/Delete/@item.Id" onclick="return confirm('Bu personeli silmek istediğinize emin misiniz?');">
+
+                            <!-- (Personel) Silme Linki -->
+                            <a class="btn btn-danger btn-sm"
+                               href="/Employee/Delete/@item.Id"
+                               onclick="return confirm('@item.FirstName @item.LastName isimli personeli silmek istediğinize emin misiniz?');">
                                 <i class="fas fa-trash"></i> Sil
                             </a>
                         </td>

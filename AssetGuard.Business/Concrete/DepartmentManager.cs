@@ -13,5 +13,11 @@ namespace AssetGuard.Business.Concrete
         public DepartmentManager(IDepartmentDal departmentDal) { _departmentDal = departmentDal; }
 
         public List<Department> TGetAll() { return _departmentDal.GetAll(); }
+
+        // --- Departman CRUD İşlemleri İçin ---
+        public void TAdd(Department entity) { _departmentDal.Add(entity); }
+        public void TDelete(Department entity) { _departmentDal.Delete(entity); }
+        public void TUpdate(Department entity) { _departmentDal.Update(entity); }
+        public Department TGetById(int id) { return _departmentDal.GetById(id); }
     }
 }

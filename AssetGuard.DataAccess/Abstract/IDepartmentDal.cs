@@ -7,5 +7,11 @@ namespace AssetGuard.DataAccess.Abstract
     public interface IDepartmentDal
     {
         List<Department> GetAll();
+
+        // --- EKSİK OLAN BU METOTLARDI ---
+        void Add(Department entity);
+        void Delete(Department entity);
+        void Update(Department entity);
+        Department GetById(int id);
     }
 }

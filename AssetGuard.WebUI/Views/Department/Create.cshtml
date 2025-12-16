@@ -1,0 +1,31 @@
+﻿@model AssetGuard.Entity.Department
+@{
+    ViewData["Title"] = "Yeni Departman";
+}
+
+<!-- Sayfa Başlığı ve Formun Çerçevesi -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Yeni Departman Kayıt Formu</h3>
+            </div>
+
+            <!-- Form: method="post" ile Controller'daki [HttpPost] Create'e gider -->
+            <form method="post">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Departman Adı</label>
+                        <!-- asp-for="Name" ile form verisi Model'in Name özelliğine eşlenir -->
+                        <input type="text" class="form-control" asp-for="Name" placeholder="Örn: Ar-Ge">
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success">Kaydet</button>
+                    <a href="/Department/Index" class="btn btn-secondary">İptal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

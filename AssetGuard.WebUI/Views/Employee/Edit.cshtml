@@ -1,39 +1,39 @@
-﻿@*Personel oluşturma Form görünümü*@
-@model AssetGuard.WebUI.Models.EmployeeAddViewModel
+﻿@model AssetGuard.WebUI.Models.EmployeeAddViewModel
 
 @{
-    ViewData["Title"] = "Yeni Personel Kaydı";
+    ViewData["Title"] = "Personel Düzenle";
 }
 
 <div class="row">
     <div class="col-md-8">
-        <!-- Formu ortalamak için 8 kolon kullandık -->
-        <div class="card card-primary">
+        <div class="card card-warning">
+            <!-- Düzenleme olduğu için Sarı renk -->
             <div class="card-header">
-                <h3 class="card-title">Yeni Personel Kayıt Formu</h3>
+                <h3 class="card-title">Personel Bilgilerini Güncelle</h3>
             </div>
 
             <form method="post">
                 <div class="card-body">
 
+                    <!-- !!! KRİTİK: Güncellenecek Kaydın ID'si !!! -->
+                    <input type="hidden" asp-for="Employee.Id" />
+
                     <!-- 1. Ad -->
                     <div class="form-group">
                         <label>Adı</label>
-                        <input type="text" class="form-control" asp-for="Employee.FirstName" placeholder="Örn: Ayşe">
+                        <input type="text" class="form-control" asp-for="Employee.FirstName">
                     </div>
 
                     <!-- 2. Soyad -->
                     <div class="form-group">
                         <label>Soyadı</label>
-                        <input type="text" class="form-control" asp-for="Employee.LastName" placeholder="Örn: Demir">
+                        <input type="text" class="form-control" asp-for="Employee.LastName">
                     </div>
 
                     <!-- 3. Departman (DROPDOWN) -->
                     <div class="form-group">
-                        <label>Departman Seçin</label>
-                        <!-- Seçilen ID, Employee.DepartmentID içine gidecek -->
+                        <label>Departman</label>
                         <select class="form-control" asp-for="Employee.DepartmentId">
-                            <option value="">-- Departman Seçiniz --</option>
                             @foreach (var item in Model.DepartmentList)
                             {
                                 <option value="@item.Id">@item.Name</option>
@@ -44,7 +44,7 @@
                 </div>
 
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success">Personeli Kaydet</button>
+                    <button type="submit" class="btn btn-warning">Güncelle</button>
                     <a href="/Employee/Index" class="btn btn-secondary">İptal</a>
                 </div>
             </form>
