@@ -27,5 +27,23 @@ namespace AssetGuard.DataAccess.Concrete
                 })
                 .ToList();
         }
+
+        public List<MonthlyExpenseReport> GetMonthlyExpenses()
+        {
+            var data = _context.Assets
+                .Where(x => x.PurchaseDate > DateTime.Now.AddYears(-5)) // DEĞİŞTİ: 6 ay yerine 5 Yıl yaptık
+                .AsEnumerable()
+                .GroupBy(x => new { x.PurchaseDate.Year, x.PurchaseDate.Month })
+                .Select(g => new MonthlyExpenseReport
+                {
+                    // Hem Yılı hem Ayı gösterelim ki karışmasın (Örn: Ocak 2024)
+                    MonthName = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM yyyy"),
+                    TotalAmount = g.Sum(x => x.Price)
+                })
+                .ToList();
+
+            return data;
+        }
+
     }
 }

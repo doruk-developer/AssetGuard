@@ -1,320 +1,155 @@
-﻿@*Bu Index yönetici özeti (Summary View)dir. Amacı verilerin genel sağlığını, özetini, trendlerini ve KPI'larını göstermek.*@
-
-
-@model AssetGuard.WebUI.Models.DashboardViewModel
-@*HTML sayfasına "Sana bir kutu (Model) gelecek, içindeki verileri yaz" diyebilmek için Bu sayfaya, DashboardViewModel adında bir veri kutusu geleceğini söyler. 
-Bu kutuyu HomeController gönderir. Sayfa, bu kutunun içindeki verilere (@Model.TotalAssetCount gibi) erişebilir hale gelir..*@
+﻿@model AssetGuard.WebUI.Models.DashboardViewModel
 
 @{
     ViewData["Title"] = "Genel Bakış";
 }
 
-<!-- =========================================================== -->
-<!-- BÖLÜM 1: ÜST KPI KARTLARI (INFO BOXES - Modern Stil) -->
-<!-- =========================================================== -->
+<!-- 1. KPI KUTULARI (CANLI) -->
 <div class="row">
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-info elevation-1"><i class="fas fa-desktop"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Toplam Demirbaş</span>
-                <span class="info-box-number">
-                    1,450
-                    <small>Adet</small>
-                </span>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>@Model.TotalAssetCount</h3>
+                <p>Toplam Demirbaş</p>
             </div>
+            <div class="icon"><i class="fas fa-boxes"></i></div>
+            <a href="/Asset/Index" class="small-box-footer">Listeye Git <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box mb-3">
-            <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-tools"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Arızalı / Bakımda</span>
-                <span class="info-box-number">14 <small>Cihaz</small></span>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>@Model.TotalFaultyCount <small style="font-size: 0.5em">Cihaz</small></h3>
+                <p>Arızalı / Bakımda</p>
             </div>
+            <div class="icon"><i class="fas fa-tools"></i></div>
+            <a href="/Report/Details?type=ariza" class="small-box-footer">Raporu Gör <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box mb-3">
-            <span class="info-box-icon bg-success elevation-1"><i class="fas fa-check-circle"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Zimmet Oranı</span>
-                <span class="info-box-number">92<small>%</small></span>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>@Model.TotalEmployeeCount <small style="font-size: 0.5em">Kişi</small></h3>
+                <p>Kayıtlı Personel</p>
             </div>
+            <div class="icon"><i class="fas fa-users"></i></div>
+            <a href="/Employee/Index" class="small-box-footer">Personeller <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
-
-    <div class="col-12 col-sm-6 col-md-3">
-        <div class="info-box mb-3">
-            <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-coins"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Envanter Değeri</span>
-                <span class="info-box-number">₺ 4,250,000</span>
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>₺ @Model.TotalInventoryValue.ToString("N0")</h3>
+                <p>Envanter Değeri</p>
             </div>
+            <div class="icon"><i class="fas fa-coins"></i></div>
+            <a href="/Report/Details?type=mali" class="small-box-footer">Mali Analiz <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
 </div>
 
-<!-- =========================================================== -->
-<!-- BÖLÜM 2: GRAFİK ANALİZLERİ (AREA & DONUT CHART) -->
-<!-- =========================================================== -->
+<!-- 2. GRAFİKLER (CANLI) -->
 <div class="row">
-    <!-- SOL: AYLIK MALİYET ANALİZİ (AREA CHART) -->
-    <div class="col-md-8">
+    <div class="col-lg-7">
         <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">Yıllık Satın Alma ve Amortisman Raporu</h5>
-                <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </div>
+            <div class="card-header border-0">
+                <h3 class="card-title">Harcama Trendi (Son 5 Yıl)</h3>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <p class="text-center">
-                            <strong>1 Ocak 2024 - 30 Aralık 2024</strong>
-                        </p>
-                        <div class="chart">
-                            <!-- Satın Alma Grafiği -->
-                            <canvas id="purchaseChart" height="180" style="height: 180px;"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <p class="text-center">
-                            <strong>Hedef Gerçekleşme</strong>
-                        </p>
-                        <!-- Progress Bars -->
-                        <div class="progress-group">
-                            IT Bütçesi Kullanımı
-                            <span class="float-right"><b>160</b>/200</span>
-                            <div class="progress progress-sm">
-                                <div class="progress-bar bg-primary" style="width: 80%"></div>
-                            </div>
-                        </div>
-                        <div class="progress-group">
-                            Mobilya Yenileme
-                            <span class="float-right"><b>310</b>/400</span>
-                            <div class="progress progress-sm">
-                                <div class="progress-bar bg-danger" style="width: 75%"></div>
-                            </div>
-                        </div>
-                        <div class="progress-group">
-                            Lisans Maliyetleri
-                            <span class="float-right"><b>480</b>/800</span>
-                            <div class="progress progress-sm">
-                                <div class="progress-bar bg-success" style="width: 60%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card-footer">
-                <div class="row">
-                    <div class="col-sm-3 col-6">
-                        <div class="description-block border-right">
-                            <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> 17%</span>
-                            <h5 class="description-header">₺35,210.43</h5>
-                            <span class="description-text">TOPLAM ALIM</span>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 col-6">
-                        <div class="description-block border-right">
-                            <span class="description-percentage text-warning"><i class="fas fa-caret-left"></i> 0%</span>
-                            <h5 class="description-header">₺10,390.90</h5>
-                            <span class="description-text">BAKIM GİDERİ</span>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 col-6">
-                        <div class="description-block border-right">
-                            <span class="description-percentage text-success"><i class="fas fa-caret-up"></i> 20%</span>
-                            <h5 class="description-header">₺24,813.53</h5>
-                            <span class="description-text">KAR (AMORTİSMAN)</span>
-                        </div>
-                    </div>
-                </div>
+                <canvas id="purchaseChart" height="200"></canvas>
             </div>
         </div>
     </div>
-
-    <!-- SAĞ: KATEGORİ DAĞILIMI (DONUT CHART - İSTEĞİN ÜZERİNE) -->
-    <div class="col-md-4">
-        <div class="card card-default">
-            <div class="card-header">
-                <h3 class="card-title">Envanter Dağılımı</h3>
-                <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </div>
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header border-0">
+                <h3 class="card-title">Kategori Dağılımı</h3>
             </div>
             <div class="card-body">
                 <canvas id="donutChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
             </div>
-            <div class="card-footer p-0">
-                <ul class="nav nav-pills flex-column">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            Bilgisayar (Laptop/PC)
-                            <span class="float-right text-danger">
-                                <i class="fas fa-arrow-down text-sm"></i> 12%
-                            </span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            Mobil Cihazlar
-                            <span class="float-right text-success">
-                                <i class="fas fa-arrow-up text-sm"></i> 4%
-                            </span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            Ofis Mobilyası
-                            <span class="float-right text-warning">
-                                <i class="fas fa-arrow-left text-sm"></i> 0%
-                            </span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
         </div>
     </div>
 </div>
 
-<!-- =========================================================== -->
-<!-- BÖLÜM 3: DETAYLI LİSTELER (ZİMMET HAREKETLERİ & YENİ ÜRÜNLER) -->
-<!-- =========================================================== -->
+<!-- 3. ALT TABLOLAR (ŞİMDİLİK STATİK - GÖRSEL DOLULUK İÇİN) -->
 <div class="row">
-    <!-- SOL: SON ZİMMET HAREKETLERİ -->
     <div class="col-md-8">
         <div class="card">
             <div class="card-header border-transparent">
                 <h3 class="card-title">Son Zimmet Hareketleri</h3>
                 <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                        <i class="fas fa-minus"></i>
-                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
                 </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table m-0">
-                        <thead>
-                            <tr>
-                                <th>Takip No</th>
-                                <th>Ürün</th>
-                                <th>Durum</th>
-                                <th>Atanan Personel</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>ID</th><th>Ürün</th><th>Durum</th><th>Personel</th></tr></thead>
                         <tbody>
-                            <tr>
-                                <td><a href="#">OR9842</a></td>
-                                <td>iPhone 14 Pro Max</td>
-                                <td><span class="badge badge-success">Teslim Edildi</span></td>
-                                <td>
-                                    <div class="sparkbar" data-color="#00a65a" data-height="20">Ahmet Yılmaz (CEO)</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><a href="#">OR1848</a></td>
-                                <td>Samsung Smart TV 55"</td>
-                                <td><span class="badge badge-warning">Onay Bekliyor</span></td>
-                                <td>
-                                    <div class="sparkbar" data-color="#f39c12" data-height="20">Toplantı Odası A</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><a href="#">OR7429</a></td>
-                                <td>HP LaserJet Pro Yazıcı</td>
-                                <td><span class="badge badge-danger">İade (Arızalı)</span></td>
-                                <td>
-                                    <div class="sparkbar" data-color="#f56954" data-height="20">IT Departmanı</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><a href="#">OR7429</a></td>
-                                <td>Macbook Pro M2</td>
-                                <td><span class="badge badge-info">Hazırlanıyor</span></td>
-                                <td>
-                                    <div class="sparkbar" data-color="#00c0ef" data-height="20">Yeni Personel</div>
-                                </td>
-                            </tr>
+                            @foreach (var item in Model.LastAssignments)
+                            {
+                                <tr>
+                                    <td><a href="#">#@item.Id</a></td>
+                                    <td>
+                                        <!-- Null Check ile güvenli hale getirelim -->
+                                        @(item.Asset != null ? item.Asset.AssetName : "Silinmiş Ürün")
+                                    </td>
+                                    <td>
+                                        @if (item.ReturnDate == null)
+                                        {
+                                            <span class="badge badge-success">Aktif Zimmet</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">İade Alındı</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @(item.Employee != null ? item.Employee.FirstName + " " + item.Employee.LastName : "Silinmiş Personel")
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
             </div>
             <div class="card-footer clearfix">
-                <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Yeni Zimmet Oluştur</a>
-                <a href="javascript:void(0)" class="btn btn-sm btn-secondary float-right">Tüm Hareketleri Gör</a>
+                <a href="/Assignment/Create" class="btn btn-sm btn-info float-left">Yeni Zimmet</a>
+                <a href="/Assignment/Index" class="btn btn-sm btn-secondary float-right">Tüm Geçmiş</a>
             </div>
         </div>
     </div>
 
-    <!-- SAĞ: SON EKLENEN DEMİRBAŞLAR (PRODUCT LIST) -->
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Envantere Yeni Girenler</h3>
-                <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </div>
             </div>
             <div class="card-body p-0">
                 <ul class="products-list product-list-in-card pl-2 pr-2">
-                    <li class="item">
-                        <div class="product-img">
-                            <img src="~/dist/img/default-150x150.png" alt="Product Image" class="img-size-50">
-                        </div>
-                        <div class="product-info">
-                            <a href="javascript:void(0)" class="product-title">
-                                Dell XPS 15
-                                <span class="badge badge-warning float-right">₺45,000</span>
-                            </a>
-                            <span class="product-description">
-                                12. Nesil i7, 32GB RAM, 1TB SSD
-                            </span>
-                        </div>
-                    </li>
-                    <li class="item">
-                        <div class="product-img">
-                            <img src="~/dist/img/default-150x150.png" alt="Product Image" class="img-size-50">
-                        </div>
-                        <div class="product-info">
-                            <a href="javascript:void(0)" class="product-title">
-                                Herman Miller Koltuk
-                                <span class="badge badge-info float-right">₺22,000</span>
-                            </a>
-                            <span class="product-description">
-                                Ergonomik Ofis Sandalyesi (Siyah)
-                            </span>
-                        </div>
-                    </li>
-                    <li class="item">
-                        <div class="product-img">
-                            <img src="~/dist/img/default-150x150.png" alt="Product Image" class="img-size-50">
-                        </div>
-                        <div class="product-info">
-                            <a href="javascript:void(0)" class="product-title">
-                                iPad Pro 12.9"
-                                <span class="badge badge-danger float-right">₺38,000</span>
-                            </a>
-                            <span class="product-description">
-                                Grafik Tasarım Ekibi için
-                            </span>
-                        </div>
-                    </li>
+                    @foreach (var item in Model.NewAssets)
+                    {
+                        <li class="item">
+                            <div class="product-img">
+                                <!-- Resim yoksa varsayılan ikon göster -->
+                                <img src="~/dist/img/default-150x150.png" alt="Product Image" class="img-size-50">
+                            </div>
+                            <div class="product-info">
+                                <a href="javascript:void(0)" class="product-title">
+                                    @item.AssetName
+                                    <span class="badge badge-warning float-right">₺@item.Price.ToString("N0")</span>
+                                </a>
+                                <span class="product-description">
+                                    @item.Category?.Name / @item.SerialNo
+                                </span>
+                            </div>
+                        </li>
+                    }
                 </ul>
             </div>
             <div class="card-footer text-center">
-                <a href="javascript:void(0)" class="uppercase">Tüm Ürünleri Görüntüle</a>
+                <a href="/Asset/Index" class="uppercase">Tüm Ürünleri Gör</a>
             </div>
         </div>
     </div>
@@ -323,91 +158,49 @@ Bu kutuyu HomeController gönderir. Sayfa, bu kutunun içindeki verilere (@Model
 @section Scripts {
     <script>
         $(function () {
-            // -----------------------
-            // - DONUT CHART (DAİRE) -
-            // -----------------------
+            // VERİLERİ JS'E AKTAR
+            var catLabels = @Html.Raw(Json.Serialize(Model.CategoryLabels));
+            var catValues = @Html.Raw(Json.Serialize(Model.CategoryValues));
+            var monthLabels = @Html.Raw(Json.Serialize(Model.MonthlyLabels));
+            var monthValues = @Html.Raw(Json.Serialize(Model.MonthlyValues));
+
+            // -- DONUT CHART --
             var donutChartCanvas = $('#donutChart').get(0).getContext('2d')
-            var donutData = {
-                labels: [
-                    'Bilgisayar',
-                    'Telefon/Tablet',
-                    'Mobilya',
-                    'Çevre Birimleri',
-                    'Diğer'
-                ],
-                datasets: [
-                    {
-                        data: [450, 200, 600, 100, 100],
-                        backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc'],
-                    }
-                ]
-            }
-            var donutOptions = {
-                maintainAspectRatio: false,
-                responsive: true,
-            }
             new Chart(donutChartCanvas, {
                 type: 'doughnut',
-                data: donutData,
-                options: donutOptions
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catValues,
+                        backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
+                    }]
+                },
+                options: { maintainAspectRatio: false, responsive: true }
             })
 
-            // -----------------------
-            // - SATIN ALMA GRAFİĞİ -
-            // -----------------------
-            var purchaseChartCanvas = $('#purchaseChart').get(0).getContext('2d')
-            var purchaseChartData = {
-                labels: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz'],
-                datasets: [
-                    {
-                        label: 'Bu Yıl Harcama (₺)',
-                        backgroundColor: 'rgba(60,141,188,0.9)',
-                        borderColor: 'rgba(60,141,188,0.8)',
-                        pointRadius: false,
-                        pointColor: '#3b8bba',
-                        pointStrokeColor: 'rgba(60,141,188,1)',
-                        pointHighlightFill: '#fff',
-                        pointHighlightStroke: 'rgba(60,141,188,1)',
-                        data: [28, 48, 40, 19, 86, 27, 90]
-                    },
-                    {
-                        label: 'Geçen Yıl Harcama (₺)',
-                        backgroundColor: 'rgba(210, 214, 222, 1)',
-                        borderColor: 'rgba(210, 214, 222, 1)',
-                        pointRadius: false,
-                        pointColor: 'rgba(210, 214, 222, 1)',
-                        pointStrokeColor: '#c1c7d1',
-                        pointHighlightFill: '#fff',
-                        pointHighlightStroke: 'rgba(220,220,220,1)',
-                        data: [65, 59, 80, 81, 56, 55, 40]
-                    },
-                ]
-            }
-
-            var purchaseChartOptions = {
-                maintainAspectRatio: false,
-                responsive: true,
-                legend: {
-                    display: false
-                },
-                scales: {
-                    xAxes: [{
-                        gridLines: {
-                            display: false,
-                        }
-                    }],
-                    yAxes: [{
-                        gridLines: {
-                            display: false,
-                        }
-                    }]
-                }
-            }
-
-            new Chart(purchaseChartCanvas, {
+            // -- LINE CHART (Aylık) --
+            var lineChartCanvas = $('#purchaseChart').get(0).getContext('2d')
+            new Chart(lineChartCanvas, {
                 type: 'line',
-                data: purchaseChartData,
-                options: purchaseChartOptions
+                data: {
+                    labels: monthLabels,
+                    datasets: [{
+                        label: 'Harcama (TL)',
+                        backgroundColor: 'rgba(60,141,188,0.2)',
+                        borderColor: 'rgba(60,141,188,1)',
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(60,141,188,1)',
+                        data: monthValues,
+                        fill: true
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        yAxes: [{ ticks: { beginAtZero: true } }]
+                    }
+                }
             })
         })
     </script>

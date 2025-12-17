@@ -6,5 +6,6 @@ namespace AssetGuard.DataAccess.Abstract
     {
         // Kategori dağılım raporunu getiren metot
         List<AssetDistributionReport> GetAssetDistribution();
+        List<MonthlyExpenseReport> GetMonthlyExpenses();
     }
 }

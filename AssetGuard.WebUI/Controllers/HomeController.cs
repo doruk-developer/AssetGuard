@@ -1,37 +1,63 @@
-using AssetGuard.Business.Abstract; // Tanýmlama sayesinde, Controller, somut sýnýfa deðil, sadece sözleþmeye (arayüze) baðýmlý olabilir. (DI Prensibi)
-using AssetGuard.WebUI.Models;      // Veritabanýndan gelen verileri taþýyýp görüntülememizi saðlayacak kutu kutu
-using Microsoft.AspNetCore.Mvc; // ASP.NET Core MVC Çekirdek Kütüphanesini çaðýrýr. Bu, yazdýðýmýz kodun bir Web projesi (ASP.NET Core MVC) içinde çalýþmasýný saðlayan temel kütüphanedir.
-//Bu üç satýr, HomeController'a "Ben bir web arayüzüyüm (AspNetCore.Mvc), sadece View'a özel veri yollarým (WebUI.Models), ama iþ kurallarý için Business katmanýna güvenirim (Business.Abstract)" dedirtir.
-
+using AssetGuard.Business.Abstract;
+using AssetGuard.WebUI.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AssetGuard.WebUI.Controllers
 {
     public class HomeController : Controller
     {
-        // 1. Servisi Tanýmla (Dependency Injection)
+        // Servisleri Tanýmlýyoruz
         private readonly IAssetService _assetService;
+        private readonly IReportService _reportService;
+        private readonly IAssignmentService _assignmentService; // YENÝ
+        private readonly IEmployeeService _employeeService;     // YENÝ
 
-        // 2. Constructor'da Servisi Ýste (Program.cs bunu saðlayacak)
-        public HomeController(IAssetService assetService)
+        // Constructor Injection: 4 servisi birden talep ediyoruz (DÜZELTÝLEN KISIM)
+        public HomeController(IAssetService assetService, IReportService reportService, IAssignmentService assignmentService, IEmployeeService employeeService)
         {
             _assetService = assetService;
+            _reportService = reportService;
+            _assignmentService = assignmentService;
+            _employeeService = employeeService;
         }
 
         public IActionResult Index()
         {
-            // 3. Veritabanýndan Gerçek Verileri Çek
+            // 1. Genel Ýstatistikleri Çek
             var toplamUrun = _assetService.TGetTotalAssetCount();
             var toplamDeger = _assetService.TGetTotalInventoryValue();
+            var personelSayisi = _employeeService.TGetAll().Count;
+            var arizaliSayisi = _assetService.TGetAssetsByStatus("Arýzalý").Count;
 
-            // 4. Verileri Kutuya (ViewModel) Koy
+            // 2. Grafik Verilerini Çek
+            var categoryReport = _reportService.GetAssetDistributionReport();
+            var expenseReport = _reportService.GetMonthlyExpenseReport();
+
+            // 3. Tablo Verileri (Son 5 Kayýt) -- (EKSÝK OLAN KISIM EKLENDÝ)
+            var sonZimmetler = _assignmentService.TGetAllWithDetails().Take(5).ToList();
+            var yeniUrunler = _assetService.TGetAllWithDetails()
+                                           .OrderByDescending(x => x.Id)
+                                           .Take(5)
+                                           .ToList();
+
+            // 4. Verileri Kutuya (ViewModel) Doldur
             var model = new DashboardViewModel
             {
+                // KPI Kutularý
                 TotalAssetCount = toplamUrun,
                 TotalInventoryValue = toplamDeger,
+                TotalEmployeeCount = personelSayisi,
+                TotalFaultyCount = arizaliSayisi,
 
-                // Bunlarýn servisini henüz yazmadýk, þimdilik sahte kalsýn
-                TotalEmployeeCount = 6,
-                TotalFaultyCount = 1
+                // Grafikler
+                CategoryLabels = categoryReport.Select(x => x.CategoryName).ToList(),
+                CategoryValues = categoryReport.Select(x => x.AssetCount).ToList(),
+                MonthlyLabels = expenseReport.Select(x => x.MonthName).ToList(),
+                MonthlyValues = expenseReport.Select(x => x.TotalAmount).ToList(),
+
+                // Tablolar
+                LastAssignments = sonZimmetler,
+                NewAssets = yeniUrunler
             };
 
             // 5. Kutuyu Sayfaya Gönder

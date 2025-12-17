@@ -13,5 +13,11 @@ namespace AssetGuard.Business.Concrete
         {
             return _reportDal.GetAssetDistribution();
         }
+
+        public List<MonthlyExpenseReport> GetMonthlyExpenseReport()
+        {
+            return _reportDal.GetMonthlyExpenses();
+        }
+
     }
 }
