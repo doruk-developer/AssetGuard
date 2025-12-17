@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = ViewData["ReportTitle"];
+}
+
+<div class="row">
+    <div class="col-md-12">
+
+        <!-- Rapor Başlık Kartı -->
+        <div class="callout callout-info">
+            <h5><i class="fas fa-file-alt"></i> @ViewData["ReportTitle"]</h5>
+            <p>@ViewData["ReportDesc"]</p>
+        </div>
+
+        <!-- Rapor İçeriği (Şimdilik Boş Tablo Taslağı) -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Rapor Sonuçları</h3>
+                <div class="card-tools">
+                    <!-- Excel/PDF Butonları (Görsel Amaçlı) -->
+                    <button type="button" class="btn btn-tool"><i class="fas fa-download"></i> Excel</button>
+                    <button type="button" class="btn btn-tool"><i class="fas fa-print"></i> Yazdır</button>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <div class="alert alert-warning alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    <h5><i class="icon fas fa-exclamation-triangle"></i> Veri Hazırlanıyor!</h5>
+                    Bu rapor modülü şu an geliştirme aşamasındadır. SQL sorguları bir sonraki fazda eklenecektir.
+                </div>
+
+                <!-- Örnek Boş Tablo -->
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Açıklama</th>
+                            <th>Durum</th>
+                            <th>Tutar / Adet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">Kriterlere uygun kayıt bulunamadı.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="card-footer">
+                <a href="/Report/Index" class="btn btn-secondary">Raporlara Geri Dön</a>
+            </div>
+        </div>
+
+    </div>
+</div>
