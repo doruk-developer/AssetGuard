@@ -1,51 +1,82 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AssetGuard.Business.Abstract;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AssetGuard.WebUI.Controllers
 {
     public class ReportController : Controller
     {
+        // --- SERVİSLERİ TANIMLIYORUZ ---
+        private readonly IAssignmentService _assignmentService; // Zimmet raporu için
+        private readonly IAssetService _assetService;           // Diğer raporlar için (YENİ EKLENDİ)
+
+        // --- CONSTRUCTOR INJECTION ---
+        public ReportController(IAssignmentService assignmentService, IAssetService assetService)
+        {
+            _assignmentService = assignmentService;
+            _assetService = assetService;
+        }
+
         public IActionResult Index()
         {
             return View();
         }
 
-        // --- YENİ EKLENEN DETAY METODU ---
         [HttpGet]
         public IActionResult Details(string type)
         {
-            // URL'den gelen ?type=zimmet gibi parametreyi yakalıyoruz.
-
             string reportTitle = "Rapor Detayı";
             string reportDescription = "";
+
+            // Veri taşıyıcı: Farklı tipte listeler gelebileceği için 'object' kullanıyoruz
+            object reportData = null;
 
             switch (type)
             {
                 case "zimmet":
                     reportTitle = "Zimmet Durumu Özet Raporu";
                     reportDescription = "Personel üzerindeki aktif zimmetlerin listesi.";
+
+                    // Aktif zimmetleri çek
+                    var allAssignments = _assignmentService.TGetAllWithDetails();
+                    reportData = allAssignments.Where(x => x.ReturnDate == null).ToList();
                     break;
+
                 case "garanti":
                     reportTitle = "Garantisi Yaklaşan Ürünler";
-                    reportDescription = "Garanti süresi 30 gün içinde dolacak cihazlar.";
+                    reportDescription = "Garanti süresi önümüzdeki 30 gün içinde bitecek (veya bitmiş) cihazlar.";
+
+                    // YENİ: AssetService'den garanti verisini çek
+                    reportData = _assetService.TGetAssetsExpiringSoon(30);
                     break;
+
                 case "mali":
                     reportTitle = "Mali Envanter Değeri";
-                    reportDescription = "Departman bazlı toplam demirbaş maliyet analizi.";
+                    reportDescription = "Tüm demirbaşların maliyet analizi.";
+
+                    // YENİ: Tüm listeyi çek (View tarafında toplatacağız)
+                    reportData = _assetService.TGetAllWithDetails();
                     break;
+
                 case "ariza":
                     reportTitle = "Arıza & Onarım Geçmişi";
-                    reportDescription = "Servise gönderilen cihazların durum raporu.";
+                    reportDescription = "Şu an 'Arızalı' veya 'Serviste' durumunda olan cihazlar.";
+
+                    // YENİ: Sadece arızalıları getir
+                    reportData = _assetService.TGetAssetsByStatus("Arızalı");
                     break;
+
                 default:
                     reportTitle = "Genel Rapor";
                     break;
             }
 
-            // Başlık ve Açıklamayı View'a taşıyoruz (ViewModel kullanmadan pratik yol)
+            // Başlıkları View'a taşı
             ViewData["ReportTitle"] = reportTitle;
             ViewData["ReportDesc"] = reportDescription;
+            ViewData["ReportType"] = type;
 
-            return View();
+            // Veriyi View'a gönder
+            return View(reportData);
         }
     }
 }

@@ -1,56 +1,124 @@
-﻿@{
+﻿@using AssetGuard.Entity
+@model dynamic
+
+@{
     ViewData["Title"] = ViewData["ReportTitle"];
+    string reportType = ViewData["ReportType"]?.ToString();
+
+    // DEĞİŞKENLERİ EN BAŞTA TANIMLIYORUZ (Scope Hatasını Önlemek İçin)
+    var zimmetList = Model as List<Assignment>;
+    var garantiList = Model as List<Asset>;
+    var maliList = Model as List<Asset>;
+    var arizaList = Model as List<Asset>;
 }
 
 <div class="row">
     <div class="col-md-12">
 
-        <!-- Rapor Başlık Kartı -->
         <div class="callout callout-info">
             <h5><i class="fas fa-file-alt"></i> @ViewData["ReportTitle"]</h5>
             <p>@ViewData["ReportDesc"]</p>
         </div>
 
-        <!-- Rapor İçeriği (Şimdilik Boş Tablo Taslağı) -->
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Rapor Sonuçları</h3>
                 <div class="card-tools">
-                    <!-- Excel/PDF Butonları (Görsel Amaçlı) -->
-                    <button type="button" class="btn btn-tool"><i class="fas fa-download"></i> Excel</button>
-                    <button type="button" class="btn btn-tool"><i class="fas fa-print"></i> Yazdır</button>
+                    <button class="btn btn-tool btn-sm"><i class="fas fa-download"></i> Excel</button>
                 </div>
             </div>
-            <div class="card-body">
 
-                <div class="alert alert-warning alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                    <h5><i class="icon fas fa-exclamation-triangle"></i> Veri Hazırlanıyor!</h5>
-                    Bu rapor modülü şu an geliştirme aşamasındadır. SQL sorguları bir sonraki fazda eklenecektir.
-                </div>
+            <div class="card-body table-responsive p-0">
 
-                <!-- Örnek Boş Tablo -->
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Tarih</th>
-                            <th>Açıklama</th>
-                            <th>Durum</th>
-                            <th>Tutar / Adet</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">Kriterlere uygun kayıt bulunamadı.</td>
-                        </tr>
-                    </tbody>
-                </table>
+                @if (reportType == "zimmet" && zimmetList != null)
+                {
+                    <table class="table table-hover text-nowrap">
+                        <thead><tr><th>Personel</th><th>Departman</th><th>Ürün</th><th>Veriliş</th></tr></thead>
+                        <tbody>
+                            @foreach (var item in zimmetList)
+                            {
+                                <tr>
+                                    <td>@item.Employee?.FirstName @item.Employee?.LastName</td>
+                                    <td><span class="badge badge-secondary">@item.Employee?.Department?.Name</span></td>
+                                    <td>@item.Asset?.AssetName</td>
+                                    <td>@item.AssignedDate.ToString("dd.MM.yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                else if (reportType == "garanti" && garantiList != null)
+                {
+                    <table class="table table-hover text-nowrap">
+                        <thead><tr><th>Ürün</th><th>Seri No</th><th>Garanti Bitiş</th></tr></thead>
+                        <tbody>
+                            @foreach (var item in garantiList)
+                            {
+                                <tr>
+                                    <td>@item.AssetName</td>
+                                    <td>@item.SerialNo</td>
+                                    <td>
+                                        @{
+                                            var days = (item.WarrantyEndDate.Value - DateTime.Now).Days;
+                                            string clr = days < 0 ? "danger" : "warning";
+                                        }
+                                        <span class="badge badge-@clr">@item.WarrantyEndDate?.ToString("dd.MM.yyyy")</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                else if (reportType == "mali" && maliList != null)
+                {
+                    <div class="p-3">
+                        <div class="info-box bg-success">
+                            <span class="info-box-icon"><i class="far fa-money-bill-alt"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Toplam Değer</span>
+                                <span class="info-box-number">₺ @maliList.Sum(x => x.Price).ToString("N0")</span>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-hover text-nowrap">
+                        <thead><tr><th>Ürün</th><th>Fiyat</th></tr></thead>
+                        <tbody>
+                            @foreach (var item in maliList)
+                            {
+                                <tr><td>@item.AssetName</td><td>₺ @item.Price.ToString("N0")</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                else if (reportType == "ariza" && arizaList != null)
+                {
+                    <table class="table table-hover text-nowrap">
+                        <thead><tr><th>Ürün</th><th>Durum</th><th>Fiyat</th></tr></thead>
+                        <tbody>
+                            @foreach (var item in arizaList)
+                            {
+                                <tr>
+                                    <td>@item.AssetName</td>
+                                    <td><span class="badge badge-danger">@item.Status?.Name</span></td>
+                                    <td>₺ @item.Price.ToString("N0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                else
+                {
+                    <div class="alert alert-warning m-3">Veri bulunamadı.</div>
+                }
 
             </div>
             <div class="card-footer">
-                <a href="/Report/Index" class="btn btn-secondary">Raporlara Geri Dön</a>
+                <a href="/Report/Index" class="btn btn-secondary">Geri Dön</a>
             </div>
         </div>
-
     </div>
 </div>

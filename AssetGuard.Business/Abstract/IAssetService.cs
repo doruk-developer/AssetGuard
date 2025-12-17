@@ -13,5 +13,10 @@ namespace AssetGuard.Business.Abstract
         // Dashboard Metotları
         decimal TGetTotalInventoryValue();
         int TGetTotalAssetCount();
+
+        // --- Raporlama için Eklenecek Servisler ---
+        List<Asset> TGetAssetsExpiringSoon(int days); // Garanti Raporu
+        List<Asset> TGetAssetsByStatus(string statusName); // Arıza Raporu
+        List<Asset> TGetAllWithDetails(); // Mali Rapor (ve Arıza için de lazım)
     }
 }

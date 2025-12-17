@@ -39,9 +39,13 @@ builder.Services.AddScoped<IEmployeeDal, EfEmployeeDal>();
 builder.Services.AddScoped<IAssignmentService, AssignmentManager>();
 builder.Services.AddScoped<IAssignmentDal, EfAssignmentDal>();
 
-// Departman Servisleri
+// --- Departman Servisleri ---
 builder.Services.AddScoped<IDepartmentService, DepartmentManager>();
 builder.Services.AddScoped<IDepartmentDal, EfDepartmentDal>();
+
+// --- Rapor Servisleri ---
+builder.Services.AddScoped<IReportService, ReportManager>();
+builder.Services.AddScoped<IReportDal, EfReportDal>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

@@ -50,5 +50,33 @@ namespace AssetGuard.Business.Concrete
         {
             return _assetDal.GetTotalInventoryValue();
         }
+
+        // 1. Garanti Raporu Sorgusu için
+        public List<Asset> TGetAssetsExpiringSoon(int days)
+        {
+            var expiryDate = DateTime.Now.AddDays(days);
+
+            // Not: _assetDal.GetAll() metodunun "Include" (ilişkili verileri getirme) 
+            // yaptığından emin olmalıyız (Önceki adımlarda yapmıştık).
+            return _assetDal.GetAll()
+                .Where(x => x.WarrantyEndDate != null && x.WarrantyEndDate <= expiryDate && x.WarrantyEndDate >= DateTime.Now)
+                .ToList();
+        }
+
+        // 2. Arıza Raporu Sorgusu için
+        public List<Asset> TGetAssetsByStatus(string statusName)
+        {
+            return _assetDal.GetAll()
+                .Where(x => x.Status != null && x.Status.Name.Contains(statusName))
+                .ToList();
+        }
+
+        // 3. Mali Durum Raporu Sorgusu için
+        public List<Asset> TGetAllWithDetails()
+        {
+            // Zaten DAL katmanındaki GetAll metodu Include ile dolu getiriyordu.
+            return _assetDal.GetAll();
+        }
+
     }
 }
