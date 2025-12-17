@@ -7,7 +7,7 @@ namespace AssetGuard.WebUI.Controllers
         public IActionResult Index()
         {
             // View oluşturmasan bile hata vermesin diye geçici metin:
-            return Content("Rapor Modülü Yapım Aşamasındadır.");
+            return View();
         }
     }
 }

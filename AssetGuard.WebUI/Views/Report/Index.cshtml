@@ -1,5 +1,42 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Raporlama Merkezi";
 }
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="fas fa-chart-bar mr-1"></i> Mevcut Sistem Raporları</h3>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped m-0">
+            <thead>
+                <tr>
+                    <th>Rapor Adı</th>
+                    <th>Açıklama</th>
+                    <th style="width: 150px">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Zimmet Durumu Özet Raporu</strong></td>
+                    <td>Şu an hangi personel üzerinde hangi ürünlerin aktif olduğunu listeler.</td>
+                    <td><a href="/Report/Details?type=zimmet" class="btn btn-block btn-outline-primary btn-sm">Görüntüle</a></td>
+                </tr>
+                <tr>
+                    <td><strong>Garantisi Yaklaşan Ürünler</strong></td>
+                    <td>Garantisi önümüzdeki 30 gün içinde bitecek cihazları filtreler.</td>
+                    <td><a href="/Report/Details?type=garanti" class="btn btn-block btn-outline-primary btn-sm">Görüntüle</a></td>
+                </tr>
+                <tr>
+                    <td><strong>Mali Envanter Değeri</strong></td>
+                    <td>Kategori ve Departman bazlı toplam yatırım tutarlarını hesaplar.</td>
+                    <td><a href="/Report/Details?type=mali" class="btn btn-block btn-outline-primary btn-sm">Görüntüle</a></td>
+                </tr>
+                <tr>
+                    <td><strong>Arıza & Onarım Geçmişi</strong></td>
+                    <td>Cihazların servis geçmişini ve kronik arıza durumlarını raporlar.</td>
+                    <td><a href="/Report/Details?type=ariza" class="btn btn-block btn-outline-primary btn-sm">Görüntüle</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

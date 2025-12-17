@@ -1,5 +1,167 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Sistem ve Panel Ayarları";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-primary card-outline card-tabs">
+            <div class="card-header p-0 pt-1 border-bottom-0">
+                <ul class="nav nav-tabs" id="settingsTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="view-tab" data-toggle="pill" href="#tab-view" role="tab">Görünüm Ayarları</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="dashboard-tab" data-toggle="pill" href="#tab-dashboard" role="tab">Dashboard Tercihleri</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="security-tab" data-toggle="pill" href="#tab-security" role="tab">Profil & Güvenlik</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="settingsTabContent">
+
+                    <!-- 1. SEKME: GÖRÜNÜM -->
+                    <div class="tab-pane fade show active" id="tab-view" role="tabpanel">
+                        <div class="form-group">
+                            <label>Sidebar Vurgu Rengi</label>
+                            <select class="form-control col-md-4" id="sidebarColorSelector">
+                                <option value="default">Varsayılan (Koyu Gri)</option> <!-- Bunu ekle -->
+                                <option value="primary">Mavi</option>
+                                <option value="warning">Sarı</option>
+                                <option value="danger">Kırmızı</option>
+                                <option value="success">Yeşil</option>
+                                <option value="indigo">İndigo</option>
+                                <option value="navy">Navy</option>
+                                <option value="purple">Mor</option>
+                                <option value="teal">Turkuaz</option>
+                                <option value="white">Beyaz (Light)</option>
+                            </select>
+                        </div>
+                        <hr />
+                        <div class="form-group">
+                            <label>Tema Modu</label>
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
+                                <label class="custom-control-label" for="darkModeSwitch">Gece Modu (Dark Mode)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. SEKME: DASHBOARD (Şimdilik Görsel) -->
+                    <div class="tab-pane fade" id="tab-dashboard" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Grafik Tercihleri</h5>
+                                <div class="form-group">
+                                    <div class="custom-control custom-radio">
+                                        <input class="custom-control-input" type="radio" id="chart1" name="chartPref" checked>
+                                        <label for="chart1" class="custom-control-label">Daire (Donut) Chart</label>
+                                    </div>
+                                    <div class="custom-control custom-radio">
+                                        <input class="custom-control-input" type="radio" id="chart2" name="chartPref">
+                                        <label for="chart2" class="custom-control-label">Çubuk (Bar) Chart</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. SEKME: GÜVENLİK (Şimdilik Görsel) -->
+                    <div class="tab-pane fade" id="tab-security" role="tabpanel">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Mevcut Şifre</label>
+                                <input type="password" class="form-control" placeholder="******">
+                            </div>
+                            <div class="form-group">
+                                <label>Yeni Şifre</label>
+                                <input type="password" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="button" class="btn btn-success float-right" onclick="saveSettings()">Tüm Ayarları Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            loadSettings();
+
+            $('#sidebarColorSelector').change(function () {
+                var color = $(this).val();
+                changeSidebarBackground(color);
+            });
+
+            $('#darkModeSwitch').change(function () {
+                // Dark mode değişince sadece body'yi etkilesin, sidebar rengini korusun
+                var isDarkMode = $(this).is(':checked');
+                var body = $('body');
+                var header = $('.main-header');
+
+                if (isDarkMode) {
+                    body.addClass('dark-mode');
+                    header.removeClass('navbar-white navbar-light').addClass('navbar-dark');
+                } else {
+                    body.removeClass('dark-mode');
+                    header.removeClass('navbar-dark').addClass('navbar-white navbar-light');
+                }
+            });
+        });
+
+        function changeSidebarBackground(color) {
+            var sidebar = $('.main-sidebar');
+            var brandLink = $('.brand-link');
+
+            // 1. Önceki tüm 'bg-' renk sınıflarını temizle
+            var colors = ['bg-primary', 'bg-warning', 'bg-danger', 'bg-success', 'bg-indigo', 'bg-navy', 'bg-purple', 'bg-fuchsia', 'bg-pink', 'bg-orange', 'bg-lime', 'bg-teal', 'bg-white', 'bg-light', 'bg-dark'];
+
+            sidebar.removeClass(colors.join(' '));
+            brandLink.removeClass(colors.join(' '));
+
+            // 2. Eğer özel bir renk seçildiyse 'bg-RENK' sınıfını ekle
+            // Not: Metinlerin okunması için 'sidebar-dark-primary' temelini koruyoruz
+            if (color !== 'default') {
+                sidebar.addClass('bg-' + color);
+                brandLink.addClass('bg-' + color);
+            } else {
+                // Varsayılan (Koyu Gri) seçildiyse bg-class ekleme, orjinal haline döner
+                // Brand logo için varsayılan bir renk (örn: primary) atayabiliriz
+                brandLink.addClass('bg-primary');
+            }
+        }
+
+        function saveSettings() {
+            var selectedColor = $('#sidebarColorSelector').val();
+            var isDarkMode = $('#darkModeSwitch').is(':checked');
+
+            localStorage.setItem('assetGuard_sidebarColor', selectedColor);
+            localStorage.setItem('assetGuard_darkMode', isDarkMode);
+
+            alert('Ayarlar kaydedildi! Tüm sidebar artık seçtiğiniz renkte.');
+        }
+
+        function loadSettings() {
+            var savedColor = localStorage.getItem('assetGuard_sidebarColor');
+            var savedDarkMode = localStorage.getItem('assetGuard_darkMode');
+
+            if (savedColor) {
+                $('#sidebarColorSelector').val(savedColor);
+                changeSidebarBackground(savedColor);
+            }
+
+            if (savedDarkMode === 'true') {
+                $('#darkModeSwitch').prop('checked', true);
+                $('body').addClass('dark-mode');
+                $('.main-header').removeClass('navbar-white navbar-light').addClass('navbar-dark');
+            }
+        }
+    </script>
 }

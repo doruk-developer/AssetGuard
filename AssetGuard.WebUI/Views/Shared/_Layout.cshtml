@@ -96,5 +96,42 @@
 
     <!-- Sayfaya özel scriptler buraya gelecek -->
     @await RenderSectionAsync("Scripts", required: false)
+
+
+    <script>
+        $(document).ready(function () {
+            var savedColor = localStorage.getItem('assetGuard_sidebarColor');
+            var savedDarkMode = localStorage.getItem('assetGuard_darkMode');
+
+            var sidebar = $('.main-sidebar');
+            var brandLink = $('.brand-link');
+            var body = $('body');
+            var header = $('.main-header');
+
+            // 1. Dark Mode
+            if (savedDarkMode === 'true') {
+                body.addClass('dark-mode');
+                header.removeClass('navbar-white navbar-light').addClass('navbar-dark');
+            }
+
+            // 2. Sidebar Tam Arka Plan Rengi
+            if (savedColor && savedColor !== 'default') {
+                // Önce temizle
+                var colors = ['bg-primary', 'bg-warning', 'bg-danger', 'bg-success', 'bg-indigo', 'bg-navy', 'bg-purple', 'bg-fuchsia', 'bg-pink', 'bg-orange', 'bg-lime', 'bg-teal', 'bg-white', 'bg-light', 'bg-dark'];
+                sidebar.removeClass(colors.join(' '));
+                brandLink.removeClass(colors.join(' '));
+
+                // Sonra boya
+                sidebar.addClass('bg-' + savedColor);
+                brandLink.addClass('bg-' + savedColor);
+            } else {
+                // Varsayılan logo rengi
+                brandLink.addClass('bg-primary');
+            }
+        });
+    </script>
 </body>
+
+
+
 </html>
