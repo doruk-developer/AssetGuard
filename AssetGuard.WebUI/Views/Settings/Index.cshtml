@@ -53,16 +53,20 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <h5>Grafik Tercihleri</h5>
+                                <!--Burası seçilen grafiğin kaydını(hatırlamasını) yapıyor-->
                                 <div class="form-group">
                                     <div class="custom-control custom-radio">
-                                        <input class="custom-control-input" type="radio" id="chart1" name="chartPref" checked>
+                                        <!-- VALUE EKLENDİ: doughnut -->
+                                        <input class="custom-control-input" type="radio" id="chart1" name="chartPref" value="doughnut" checked>
                                         <label for="chart1" class="custom-control-label">Daire (Donut) Chart</label>
                                     </div>
                                     <div class="custom-control custom-radio">
-                                        <input class="custom-control-input" type="radio" id="chart2" name="chartPref">
+                                        <!-- VALUE EKLENDİ: bar -->
+                                        <input class="custom-control-input" type="radio" id="chart2" name="chartPref" value="bar">
                                         <label for="chart2" class="custom-control-label">Çubuk (Bar) Chart</label>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -142,26 +146,35 @@
             var selectedColor = $('#sidebarColorSelector').val();
             var isDarkMode = $('#darkModeSwitch').is(':checked');
 
+            // Grafik tercihini al
+            var selectedChartType = $('input[name="chartPref"]:checked').val();
+
             localStorage.setItem('assetGuard_sidebarColor', selectedColor);
             localStorage.setItem('assetGuard_darkMode', isDarkMode);
 
-            alert('Ayarlar kaydedildi! Tüm sidebar artık seçtiğiniz renkte.');
+            // Grafik tercihini kaydet
+            localStorage.setItem('assetGuard_chartType', selectedChartType);
+
+            alert('Ayarlar kaydedildi! Dashboard grafiği bir sonraki yüklemede değişecek.');
         }
 
         function loadSettings() {
             var savedColor = localStorage.getItem('assetGuard_sidebarColor');
             var savedDarkMode = localStorage.getItem('assetGuard_darkMode');
 
-            if (savedColor) {
-                $('#sidebarColorSelector').val(savedColor);
-                changeSidebarBackground(savedColor);
+            // Kayıtlı grafik tercihini oku
+            var savedChartType = localStorage.getItem('assetGuard_chartType');
+
+            if (savedColor) $('#sidebarColorSelector').val(savedColor);
+            if (savedDarkMode === 'true') $('#darkModeSwitch').prop('checked', true);
+
+            // Eğer kayıtlı bir tercih varsa o radio button'u işaretle
+            if (savedChartType) {
+                $('input[name="chartPref"][value="' + savedChartType + '"]').prop('checked', true);
             }
 
-            if (savedDarkMode === 'true') {
-                $('#darkModeSwitch').prop('checked', true);
-                $('body').addClass('dark-mode');
-                $('.main-header').removeClass('navbar-white navbar-light').addClass('navbar-dark');
-            }
+            applyTheme();
         }
+        
     </script>
 }

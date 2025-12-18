@@ -165,9 +165,12 @@
             var monthValues = @Html.Raw(Json.Serialize(Model.MonthlyValues));
 
             // -- DONUT CHART --
+             // 1. Kullanıcının tercihini oku (Yoksa varsayılan 'doughnut' olsun)
+            var userChartType = localStorage.getItem('assetGuard_chartType') || 'doughnut';
+
             var donutChartCanvas = $('#donutChart').get(0).getContext('2d')
             new Chart(donutChartCanvas, {
-                type: 'doughnut',
+                type: userChartType, // BURASI ARTIK DİNAMİK! ('bar' veya 'doughnut' gelir)
                 data: {
                     labels: catLabels,
                     datasets: [{
@@ -175,7 +178,14 @@
                         backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
                     }]
                 },
-                options: { maintainAspectRatio: false, responsive: true }
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    // Eğer Bar chart seçilirse Y ekseni 0'dan başlasın
+                    scales: {
+                        yAxes: userChartType === 'bar' ? [{ ticks: { beginAtZero: true } }] : []
+                    }
+                }
             })
 
             // -- LINE CHART (Aylık) --
