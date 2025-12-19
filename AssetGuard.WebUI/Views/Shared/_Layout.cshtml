@@ -19,6 +19,71 @@
     <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
     <!-- overlayScrollbars -->
     <link rel="stylesheet" href="~/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+
+    <!-- Google Font (poppins) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Stillendirme (Modern Görünüm & Offline Font) -->
+    <style>
+        /* A) YEREL SİSTEM FONTLARI (Google Fonts yerine) */
+        body {
+            font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        /* B) SIDEBAR MODERNLEŞTİRME (Sadece Şekil, Renk Yok!) */
+        .nav-sidebar .nav-link {
+            border-radius: 8px; /* Hafif yuvarlak köşe */
+            margin-bottom: 4px; /* Linkler arası boşluk */
+            transition: all 0.2s; /* Yumuşak geçiş */
+        }
+
+        /* C) AKTİF MENÜ (Renk zorlaması KALDIRILDI) */
+        .nav-sidebar .nav-item > .nav-link.active {
+            font-weight: 600; /* Aktif olan kalın olsun */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* Hafif gölge */
+            /* Background rengini sildik, ayarlar sayfasından gelen renk işleyecek */
+        }
+
+        /* D) LOGO ALANI */
+        .brand-link {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* E) GENEL KARTLAR */
+        .card {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        }
+
+        /* F) LOGO RENGİ ZORLAMA (AdminLTE varsayılanını ezmek için) */
+        ..bg-primary {
+            background-color: #007bff !important;
+        }
+
+        .bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        .bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .bg-warning {
+            background-color: #ffc107 !important;
+            color: #1f2d3d !important;
+        }
+
+        .bg-info {
+            background-color: #17a2b8 !important;
+        }
+
+        .bg-dark {
+            background-color: #343a40 !important;
+        }
+    </style>
+
+
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
@@ -100,33 +165,56 @@
 
     <script>
         $(document).ready(function () {
+            // Ayarları Oku
             var savedColor = localStorage.getItem('assetGuard_sidebarColor');
             var savedDarkMode = localStorage.getItem('assetGuard_darkMode');
 
+            // Elementleri Seç
             var sidebar = $('.main-sidebar');
             var brandLink = $('.brand-link');
             var body = $('body');
             var header = $('.main-header');
 
-            // 1. Dark Mode
+            // 1. DARK MODE
             if (savedDarkMode === 'true') {
                 body.addClass('dark-mode');
                 header.removeClass('navbar-white navbar-light').addClass('navbar-dark');
             }
 
-            // 2. Sidebar Tam Arka Plan Rengi
+            // 2. RENK AYARI (Stil Bazlı - Kesin Çözüm)
             if (savedColor && savedColor !== 'default') {
-                // Önce temizle
-                var colors = ['bg-primary', 'bg-warning', 'bg-danger', 'bg-success', 'bg-indigo', 'bg-navy', 'bg-purple', 'bg-fuchsia', 'bg-pink', 'bg-orange', 'bg-lime', 'bg-teal', 'bg-white', 'bg-light', 'bg-dark'];
-                sidebar.removeClass(colors.join(' '));
-                brandLink.removeClass(colors.join(' '));
+                // Renk Kodları Sözlüğü (Map)
+                var colorMap = {
+                    'primary': '#007bff',
+                    'secondary': '#6c757d',
+                    'success': '#28a745',
+                    'danger': '#dc3545',
+                    'warning': '#ffc107',
+                    'info': '#17a2b8',
+                    'dark': '#343a40',
+                    'indigo': '#6610f2',
+                    'navy': '#001f3f',
+                    'purple': '#6f42c1',
+                    'teal': '#20c997',
+                    'white': '#ffffff'
+                };
 
-                // Sonra boya
-                sidebar.addClass('bg-' + savedColor);
-                brandLink.addClass('bg-' + savedColor);
+                var hexColor = colorMap[savedColor];
+
+                if (hexColor) {
+                    // CSS Class ile uğraşma, direkt rengi bas!
+                    sidebar.attr('style', 'background-color: ' + hexColor + ' !important');
+                    brandLink.attr('style', 'background-color: ' + hexColor + ' !important');
+
+                    // Eğer açık renkse (White, Warning) metin rengini siyah yap
+                    if(savedColor === 'white' || savedColor === 'warning' || savedColor === 'light') {
+                         sidebar.addClass('sidebar-light-primary').removeClass('sidebar-dark-primary');
+                    }
+                }
             } else {
-                // Varsayılan logo rengi
-                brandLink.addClass('bg-dark');
+                // Varsayılan ise stili temizle
+                sidebar.removeAttr('style');
+                brandLink.removeAttr('style');
             }
         });
     </script>

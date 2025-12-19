@@ -96,16 +96,33 @@
 
 @section Scripts {
     <script>
+        // Renk Kodları Sözlüğü (Layout ile Aynı)
+        var colorMap = {
+            'primary': '#007bff',
+            'secondary': '#6c757d',
+            'success': '#28a745',
+            'danger': '#dc3545',
+            'warning': '#ffc107',
+            'info': '#17a2b8',
+            'dark': '#343a40',
+            'indigo': '#6610f2',
+            'navy': '#001f3f',
+            'purple': '#6f42c1',
+            'teal': '#20c997',
+            'white': '#ffffff'
+        };
+
         $(document).ready(function () {
             loadSettings();
 
+            // Renk Seçimi Değişince (Canlı Önizleme)
             $('#sidebarColorSelector').change(function () {
-                var color = $(this).val();
-                changeSidebarBackground(color);
+                var colorKey = $(this).val();
+                changeSidebarStyle(colorKey);
             });
 
+            // Dark Mode Değişince
             $('#darkModeSwitch').change(function () {
-                // Dark mode değişince sadece body'yi etkilesin, sidebar rengini korusun
                 var isDarkMode = $(this).is(':checked');
                 var body = $('body');
                 var header = $('.main-header');
@@ -120,61 +137,63 @@
             });
         });
 
-        function changeSidebarBackground(color) {
+        // Stili Doğrudan Uygulayan Fonksiyon
+        function changeSidebarStyle(colorKey) {
             var sidebar = $('.main-sidebar');
             var brandLink = $('.brand-link');
 
-            // 1. Önceki tüm 'bg-' renk sınıflarını temizle
-            var colors = ['bg-primary', 'bg-warning', 'bg-danger', 'bg-success', 'bg-indigo', 'bg-navy', 'bg-purple', 'bg-fuchsia', 'bg-pink', 'bg-orange', 'bg-lime', 'bg-teal', 'bg-white', 'bg-light', 'bg-dark'];
+            if (colorKey && colorKey !== 'default') {
+                var hexColor = colorMap[colorKey];
+                if (hexColor) {
+                    // CSS Class yerine direkt Style basıyoruz (Garantili Yöntem)
+                    sidebar.attr('style', 'background-color: ' + hexColor + ' !important');
+                    brandLink.attr('style', 'background-color: ' + hexColor + ' !important');
 
-            sidebar.removeClass(colors.join(' '));
-            brandLink.removeClass(colors.join(' '));
-
-            // 2. Eğer özel bir renk seçildiyse 'bg-RENK' sınıfını ekle
-            // Not: Metinlerin okunması için 'sidebar-dark-primary' temelini koruyoruz
-            if (color !== 'default') {
-                sidebar.addClass('bg-' + color);
-                brandLink.addClass('bg-' + color);
+                    // Açık renkler için metin rengi ayarı
+                    if (['white', 'warning', 'lime', 'teal'].includes(colorKey)) {
+                         sidebar.addClass('sidebar-light-primary').removeClass('sidebar-dark-primary');
+                    } else {
+                         sidebar.addClass('sidebar-dark-primary').removeClass('sidebar-light-primary');
+                    }
+                }
             } else {
-                // Varsayılan (Koyu Gri) seçildiyse bg-class ekleme, orjinal haline döner
-                // Brand logo için varsayılan bir renk (örn: dark) atayabiliriz
-                brandLink.addClass('bg-dark');
+                // Varsayılan seçildiyse stili temizle (Orjinale dön)
+                sidebar.removeAttr('style');
+                brandLink.removeAttr('style');
+                sidebar.addClass('sidebar-dark-primary').removeClass('sidebar-light-primary');
             }
         }
 
         function saveSettings() {
             var selectedColor = $('#sidebarColorSelector').val();
             var isDarkMode = $('#darkModeSwitch').is(':checked');
-
-            // Grafik tercihini al
             var selectedChartType = $('input[name="chartPref"]:checked').val();
 
             localStorage.setItem('assetGuard_sidebarColor', selectedColor);
             localStorage.setItem('assetGuard_darkMode', isDarkMode);
-
-            // Grafik tercihini kaydet
             localStorage.setItem('assetGuard_chartType', selectedChartType);
 
-            alert('Ayarlar kaydedildi! Dashboard grafiği bir sonraki yüklemede değişecek.');
+            alert('Ayarlar kaydedildi ve uygulandı!');
         }
 
         function loadSettings() {
             var savedColor = localStorage.getItem('assetGuard_sidebarColor');
             var savedDarkMode = localStorage.getItem('assetGuard_darkMode');
-
-            // Kayıtlı grafik tercihini oku
             var savedChartType = localStorage.getItem('assetGuard_chartType');
 
-            if (savedColor) $('#sidebarColorSelector').val(savedColor);
-            if (savedDarkMode === 'true') $('#darkModeSwitch').prop('checked', true);
+            if (savedColor) {
+                $('#sidebarColorSelector').val(savedColor);
+                // Sayfa açılır açılmaz rengi uygula
+                changeSidebarStyle(savedColor);
+            }
 
-            // Eğer kayıtlı bir tercih varsa o radio button'u işaretle
+            if (savedDarkMode === 'true') {
+                $('#darkModeSwitch').prop('checked', true);
+            }
+
             if (savedChartType) {
                 $('input[name="chartPref"][value="' + savedChartType + '"]').prop('checked', true);
             }
-
-            applyTheme();
         }
-        
     </script>
 }
