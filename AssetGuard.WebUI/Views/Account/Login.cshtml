@@ -1,39 +1,47 @@
 ﻿@{
-    Layout = null; // Bu sayfa ana temadan bağımsız olacak
-    ViewData["Title"] = "Giriş Yap";
+    Layout = null;
 }
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AssetGuard | Giriş</title>
-    <!-- AdminLTE Stilleri -->
+
+    <!-- Stil Dosyaları -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="~/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
     <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
+
+    <style>
+        body {
+            background-color: #e9ecef !important;
+        }
+
+        .login-logo a {
+            color: #495057;
+        }
+    </style>
 </head>
 <body class="hold-transition login-page">
-
     <div class="login-box">
+
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <!-- DİŞLİ LOGOMUZ -->
-                <img src="~/dist/img/assetguard-logo.png" alt="Logo" class="mb-2" style="width: 70px;"><br>
-                <a href="#" class="h1"><b>Asset</b>Guard</a>
+                <!-- Logo Alanı -->
+                <img src="~/dist/img/assetguard-logo.png" alt="Logo" class="mb-2" style="width: 60px; opacity: 0.9"><br>
+                <a href="/" class="h1"><b>Asset</b>Guard</a>
             </div>
             <div class="card-body">
                 <p class="login-box-msg">Yönetim paneline erişmek için giriş yapın</p>
 
-                <!-- FORM BAŞLANGICI -->
-                <form action="/Account/Login" method="post">
+                <!-- FORM BAŞLANGICI: Account Controller'a gider -->
+                <form asp-controller="Account" asp-action="Login" method="post">
 
-                    <!-- Eğer önceki sayfadan geldiyse (ReturnUrl) onu sakla -->
-                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
-
+                    <!-- Kullanıcı Adı -->
                     <div class="input-group mb-3">
-                        <input type="text" name="username" class="form-control" placeholder="Kullanıcı Adı ...">
+                        <input type="text" name="username" class="form-control" placeholder="Kullanıcı Adı ..." required>
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-user"></span>
@@ -41,8 +49,9 @@
                         </div>
                     </div>
 
+                    <!-- Şifre -->
                     <div class="input-group mb-3">
-                        <input type="password" name="password" class="form-control" placeholder="Şifre ...">
+                        <input type="password" name="password" class="form-control" placeholder="Şifre ..." required>
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
@@ -50,22 +59,33 @@
                         </div>
                     </div>
 
+                    <!-- Buton Row -->
                     <div class="row">
                         <div class="col-12">
                             <button type="submit" class="btn btn-primary btn-block">Giriş Yap</button>
                         </div>
                     </div>
 
-                    <!-- HATA MESAJI ALANI -->
-                    <div class="text-danger mt-3 text-center font-weight-bold">
+                    <!-- İŞTE EKSİK OLAN KISIM: Butonun hemen altı -->
+                    <p class="mb-1 mt-3 text-center">
+                        <a href="/Account/ForgotPassword" class="text-secondary">
+                            <i class="fas fa-key mr-1"></i> Şifremi unuttum
+                        </a>
+                    </p>
+
+                    <!-- Hata Mesajları -->
+                    <div class="text-danger mt-2 text-center small">
                         @Html.ValidationSummary(true)
                     </div>
 
                 </form>
             </div>
+            <!-- /.card-body -->
         </div>
+        <!-- /.card -->
     </div>
-
+    <!-- /.login-box -->
+    <!-- Scriptler -->
     <script src="~/plugins/jquery/jquery.min.js"></script>
     <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/dist/js/adminlte.min.js"></script>

@@ -51,6 +51,9 @@ builder.Services.AddScoped<IDepartmentDal, EfDepartmentDal>();
 builder.Services.AddScoped<IReportService, ReportManager>();
 builder.Services.AddScoped<IReportDal, EfReportDal>();
 
+// --- Kullanýcý Servisleri ---
+builder.Services.AddScoped<IEmailService, EmailManager>();
+
 // --- 1. IDENTITY SERVISLERINI EKLE ---
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
@@ -61,7 +64,8 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireDigit = false;
 })
-.AddEntityFrameworkStores<ZimmetContext>();
+.AddEntityFrameworkStores<ZimmetContext>()
+.AddDefaultTokenProviders();
 
 // --- 2. LOGIN YÖNLENDÝRME AYARI ---
 builder.Services.ConfigureApplicationCookie(options =>

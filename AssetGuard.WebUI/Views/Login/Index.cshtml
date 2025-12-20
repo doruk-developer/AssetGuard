@@ -8,12 +8,15 @@
     <title>AssetGuard | Login</title>
     <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
-    <style>body { background-color: #e9ecef !important; }</style>
+    <style>
+        body {
+            background-color: #e9ecef !important;
+        }</style>
 </head>
 <body class="hold-transition login-page">
     <div class="login-box">
         <div class="card card-outline card-primary">
-            
+
             <div class="card-header text-center">
                 <img src="~/dist/img/assetguard-logo.png" alt="AssetGuard Logo" class="mb-2" style="width: 70px;"><br>
                 <a href="/" class="h1"><b>Asset</b>Guard</a>
@@ -21,22 +24,39 @@
 
             <div class="card-body">
                 <p class="login-box-msg">Yönetim paneli için giriş yapın</p>
+
+                <!-- Eğer AccountController kullanıyorsan action="/Account/Login" olmalı, LoginController ise bu şekilde kalabilir -->
                 <form action="/Login/Index" method="post">
                     <div class="input-group mb-3">
                         <input type="text" name="username" class="form-control" placeholder="Kullanıcı Adı" required>
-                        <div class="input-group-append"><div class="input-group-text"><span class="fas fa-user"></span></div></div>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><span class="fas fa-user"></span></div>
+                        </div>
                     </div>
+
                     <div class="input-group mb-3">
                         <input type="password" name="password" class="form-control" placeholder="Şifre" required>
-                        <div class="input-group-append"><div class="input-group-text"><span class="fas fa-lock"></span></div></div>
+                        <div class="input-group-append">
+                            <div class="input-group-text"><span class="fas fa-lock"></span></div>
+                        </div>
                     </div>
+
+                    <!-- Buton Alanı -->
                     <div class="row">
                         <div class="col-12">
                             <button type="submit" class="btn btn-primary btn-block">Giriş Yap</button>
                         </div>
                     </div>
+
+                    <!-- Şifremi Unuttum Linki (Row div'inin dışına, en alta alındı) -->
+                    <p class="mb-1 mt-3 text-center">
+                        <a href="/Account/ForgotPassword">Şifremi unuttum</a>
+                    </p>
+
+                    <!-- Hata Mesajları -->
                     <div class="text-danger mt-2 text-center">@Html.ValidationSummary(true)</div>
                 </form>
+
             </div>
         </div>
     </div>
