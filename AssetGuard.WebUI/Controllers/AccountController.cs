@@ -183,45 +183,6 @@ namespace AssetGuard.WebUI.Controllers
         // 5. ŞİFRE DEĞİŞTİRME (İÇERİDEN - LOGIN OLMUŞ KULLANICI İÇİN)
         // ==========================================
 
-        [HttpGet]
-        public IActionResult ChangePassword()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            // 1. Giriş yapmış olan kullanıcıyı bul
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login");
-
-            // 2. Şifreyi değiştir
-            // (Bu metot arka planda 'Mevcut Şifre'yi kontrol eder, yanlışsa hata döner)
-            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
-
-            if (result.Succeeded)
-            {
-                // 3. ÖNEMLİ: Şifre değişince oturum düşer, tekrar tazelememiz lazım (Re-SignIn)
-                await _signInManager.RefreshSignInAsync(user);
-
-                ViewBag.SuccessMessage = "Şifreniz başarıyla güncellendi!";
-                return View();
-            }
-
-            // Hata varsa (Örn: Mevcut şifre yanlış)
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
-            }
-
-            return View(model);
-        }
-
-
     }
 
 }

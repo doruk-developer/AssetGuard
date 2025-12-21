@@ -1,9 +1,28 @@
-﻿@{
+﻿@model AssetGuard.WebUI.Models.ChangePasswordViewModel
+@{
     ViewData["Title"] = "Sistem ve Panel Ayarları";
 }
 
 <div class="row">
     <div class="col-md-12">
+        <!-- Başarı veya Hata Mesajları -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-check"></i> Başarılı!</h5>
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h5><i class="icon fas fa-ban"></i> Hata!</h5>
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
         <div class="card card-primary card-outline card-tabs">
             <div class="card-header p-0 pt-1 border-bottom-0">
                 <ul class="nav nav-tabs" id="settingsTab" role="tablist">
@@ -26,7 +45,7 @@
                         <div class="form-group">
                             <label>Sidebar Vurgu Rengi</label>
                             <select class="form-control col-md-4" id="sidebarColorSelector">
-                                <option value="default">Varsayılan (Koyu Gri)</option> <!-- Bunu ekle -->
+                                <option value="default">Varsayılan (Koyu Gri)</option>
                                 <option value="primary">Mavi</option>
                                 <option value="warning">Sarı</option>
                                 <option value="danger">Kırmızı</option>
@@ -46,49 +65,71 @@
                                 <label class="custom-control-label" for="darkModeSwitch">Gece Modu (Dark Mode)</label>
                             </div>
                         </div>
+                        <button type="button" class="btn btn-success" onclick="saveSettings()">Görünüm Ayarlarını Kaydet</button>
                     </div>
 
-                    <!-- 2. SEKME: DASHBOARD (Şimdilik Görsel) -->
+                    <!-- 2. SEKME: DASHBOARD -->
                     <div class="tab-pane fade" id="tab-dashboard" role="tabpanel">
                         <div class="row">
                             <div class="col-md-6">
                                 <h5>Grafik Tercihleri</h5>
-                                <!--Burası seçilen grafiğin kaydını(hatırlamasını) yapıyor-->
                                 <div class="form-group">
                                     <div class="custom-control custom-radio">
-                                        <!-- VALUE EKLENDİ: doughnut -->
                                         <input class="custom-control-input" type="radio" id="chart1" name="chartPref" value="doughnut" checked>
                                         <label for="chart1" class="custom-control-label">Daire (Donut) Chart</label>
                                     </div>
                                     <div class="custom-control custom-radio">
-                                        <!-- VALUE EKLENDİ: bar -->
                                         <input class="custom-control-input" type="radio" id="chart2" name="chartPref" value="bar">
                                         <label for="chart2" class="custom-control-label">Çubuk (Bar) Chart</label>
                                     </div>
                                 </div>
-
+                                <button type="button" class="btn btn-success" onclick="saveSettings()">Dashboard Tercihlerini Kaydet</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 3. SEKME: GÜVENLİK (Şimdilik Görsel) -->
+                    <!-- 3. SEKME: PROFİL & GÜVENLİK (ARTIK CANLI) -->
                     <div class="tab-pane fade" id="tab-security" role="tabpanel">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Mevcut Şifre</label>
-                                <input type="password" class="form-control" placeholder="******">
+                        <div class="row pt-2">
+                            <div class="col-md-6">
+                                <h5 class="mb-3 text-primary"><i class="fas fa-key mr-2"></i> Şifre Güncelleme</h5>
+                                <form asp-action="ChangePassword" method="post">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+
+                                    <div class="form-group">
+                                        <label asp-for="CurrentPassword">Mevcut Şifre</label>
+                                        <input asp-for="CurrentPassword" type="password" class="form-control" placeholder="******" required />
+                                        <span asp-validation-for="CurrentPassword" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="NewPassword">Yeni Şifre</label>
+                                        <input asp-for="NewPassword" type="password" class="form-control" required />
+                                        <span asp-validation-for="NewPassword" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label asp-for="ConfirmPassword">Yeni Şifre Tekrar</label>
+                                        <input asp-for="ConfirmPassword" type="password" class="form-control" required />
+                                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Şifreyi Değiştir</button>
+                                </form>
                             </div>
-                            <div class="form-group">
-                                <label>Yeni Şifre</label>
-                                <input type="password" class="form-control">
+                            <div class="col-md-6 border-left">
+                                <h5 class="mb-3 text-secondary"><i class="fas fa-id-card mr-2"></i> Hesap Bilgileri</h5>
+                                <div class="callout callout-info">
+                                    <p>Kullanıcı Adı: <strong>@User.Identity.Name</strong></p>
+                                    <p>Rol: <span class="badge badge-primary">Sistem Yöneticisi</span></p>
+                                    <hr />
+                                    <small class="text-muted">Profil fotoğrafı ve e-posta güncelleme özellikleri bir sonraki sürümde aktif edilecektir.</small>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                 </div>
-            </div>
-            <div class="card-footer">
-                <button type="button" class="btn btn-success float-right" onclick="saveSettings()">Tüm Ayarları Kaydet</button>
             </div>
         </div>
     </div>
@@ -96,7 +137,6 @@
 
 @section Scripts {
     <script>
-        // Renk Kodları Sözlüğü (Layout ile Aynı)
         var colorMap = {
             'primary': '#007bff',
             'secondary': '#6c757d',
@@ -115,29 +155,30 @@
         $(document).ready(function () {
             loadSettings();
 
-            // Renk Seçimi Değişince (Canlı Önizleme)
+            // Renk Seçimi Değişince
             $('#sidebarColorSelector').change(function () {
-                var colorKey = $(this).val();
-                changeSidebarStyle(colorKey);
+                changeSidebarStyle($(this).val());
             });
 
             // Dark Mode Değişince
             $('#darkModeSwitch').change(function () {
                 var isDarkMode = $(this).is(':checked');
-                var body = $('body');
-                var header = $('.main-header');
-
-                if (isDarkMode) {
-                    body.addClass('dark-mode');
-                    header.removeClass('navbar-white navbar-light').addClass('navbar-dark');
-                } else {
-                    body.removeClass('dark-mode');
-                    header.removeClass('navbar-dark').addClass('navbar-white navbar-light');
-                }
+                applyDarkMode(isDarkMode);
             });
         });
 
-        // Stili Doğrudan Uygulayan Fonksiyon
+        function applyDarkMode(isDarkMode) {
+            var body = $('body');
+            var header = $('.main-header');
+            if (isDarkMode) {
+                body.addClass('dark-mode');
+                header.removeClass('navbar-white navbar-light').addClass('navbar-dark');
+            } else {
+                body.removeClass('dark-mode');
+                header.removeClass('navbar-dark').addClass('navbar-white navbar-light');
+            }
+        }
+
         function changeSidebarStyle(colorKey) {
             var sidebar = $('.main-sidebar');
             var brandLink = $('.brand-link');
@@ -145,19 +186,15 @@
             if (colorKey && colorKey !== 'default') {
                 var hexColor = colorMap[colorKey];
                 if (hexColor) {
-                    // CSS Class yerine direkt Style basıyoruz (Garantili Yöntem)
                     sidebar.attr('style', 'background-color: ' + hexColor + ' !important');
                     brandLink.attr('style', 'background-color: ' + hexColor + ' !important');
-
-                    // Açık renkler için metin rengi ayarı
-                    if (['white', 'warning', 'lime', 'teal'].includes(colorKey)) {
+                    if (['white', 'warning', 'teal'].includes(colorKey)) {
                          sidebar.addClass('sidebar-light-primary').removeClass('sidebar-dark-primary');
                     } else {
                          sidebar.addClass('sidebar-dark-primary').removeClass('sidebar-light-primary');
                     }
                 }
             } else {
-                // Varsayılan seçildiyse stili temizle (Orjinale dön)
                 sidebar.removeAttr('style');
                 brandLink.removeAttr('style');
                 sidebar.addClass('sidebar-dark-primary').removeClass('sidebar-light-primary');
@@ -173,7 +210,7 @@
             localStorage.setItem('assetGuard_darkMode', isDarkMode);
             localStorage.setItem('assetGuard_chartType', selectedChartType);
 
-            alert('Ayarlar kaydedildi ve uygulandı!');
+            alert('Panel tercihleri başarıyla tarayıcıya kaydedildi!');
         }
 
         function loadSettings() {
@@ -183,14 +220,12 @@
 
             if (savedColor) {
                 $('#sidebarColorSelector').val(savedColor);
-                // Sayfa açılır açılmaz rengi uygula
                 changeSidebarStyle(savedColor);
             }
-
             if (savedDarkMode === 'true') {
                 $('#darkModeSwitch').prop('checked', true);
+                applyDarkMode(true);
             }
-
             if (savedChartType) {
                 $('input[name="chartPref"][value="' + savedChartType + '"]').prop('checked', true);
             }
