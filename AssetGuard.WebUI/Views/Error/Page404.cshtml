@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "Sayfa Bulunamadı";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>404 Hata Sayfası</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="error-page">
+        <h2 class="headline text-warning"> 404</h2>
+
+        <div class="error-content">
+            <h3><i class="fas fa-exclamation-triangle text-warning"></i> Aradığınız sayfa bulunamadı...</h3>
+
+            <p>
+                Aradığınız sayfa silinmiş, adı değiştirilmiş veya geçici olarak servis dışı kalmış olabilir.
+                Bu sırada <a href="/">kontrol paneline (Dashboard)</a> dönebilirsiniz.
+            </p>
+
+            <div class="mt-4">
+                <a href="/" class="btn btn-warning btn-flat">
+                    <i class="fas fa-home mr-2"></i> Ana Sayfaya Dön
+                </a>
+                <a href="javascript:history.back()" class="btn btn-default btn-flat ml-2">
+                    <i class="fas fa-arrow-left mr-2"></i> Geri Gel
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

@@ -88,12 +88,24 @@ var app = builder.Build(); // EN SONRA BUILD EDÝLÝR
 
 
 // Configure the HTTP request pipeline.
+// --- HATA YÖNETÝMÝ BAÞLANGIÇ ---
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // Canlý ortamda (Production) ise 500 hatasýna git
+    app.UseExceptionHandler("/Error/Page500");
     app.UseHsts();
 }
+else
+{
+    // Geliþtirme ortamýnda (Development) bile olsak, 
+    // testi görmek için geçici olarak bunu açýyoruz.
+    // Normalde burasý app.UseDeveloperExceptionPage(); olur.
+    app.UseExceptionHandler("/Error/Page500"); // <--- TEST ÝÇÝN BUNU AÇTIK
+}
+
+// 404 Hatalarý için (Sayfa bulunamadý)
+app.UseStatusCodePagesWithReExecute("/Error/Page404", "?code={0}");
+// --- HATA YÖNETÝMÝ BÝTÝÞ ---
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

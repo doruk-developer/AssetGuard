@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Sistem Hatası";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>500 Sistem Hatası</h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="error-page">
+        <h2 class="headline text-danger">500</h2>
+
+        <div class="error-content">
+            <h3><i class="fas fa-exclamation-triangle text-danger"></i> Beklenmedik bir hata oluştu...</h3>
+
+            <p>
+                Sistemde teknik bir aksaklık meydana geldi. Mühendislerimiz bu durumdan otomatik olarak haberdar edildi ve çözüm üzerinde çalışıyorlar.
+            </p>
+
+            <p>
+                Lütfen işlemi bir süre sonra tekrar deneyiniz.
+            </p>
+
+            <div class="mt-4">
+                <a href="/" class="btn btn-danger btn-flat">
+                    <i class="fas fa-home mr-2"></i> Güvenli Bölgeye Dön
+                </a>
+                <!-- Destek maili varsa buraya eklenir -->
+                <a href="mailto:destek@assetguard.com" class="btn btn-default btn-flat ml-2">
+                    <i class="fas fa-envelope mr-2"></i> Destek Ekibine Yaz
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
