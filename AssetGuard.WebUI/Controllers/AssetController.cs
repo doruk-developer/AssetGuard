@@ -7,6 +7,7 @@
 
 using AssetGuard.Business.Abstract;
 using AssetGuard.WebUI.Models;
+using ClosedXML.Excel; // Excel çıktısı alabilmek için
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssetGuard.WebUI.Controllers
@@ -174,6 +175,62 @@ namespace AssetGuard.WebUI.Controllers
                 _assetService.TDelete(value);
             }
             return RedirectToAction("Index");
+        }
+
+        public IActionResult ExportExcel()
+        {
+            // 1. Verileri veritabanından çekiyoruz
+            var assetList = _assetService.TGetAll();
+
+            // 2. Bellekte bir Excel dosyası oluşturuyoruz
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Envanter Listesi");
+
+                // Başlıkları yazıyoruz (Hücre koordinatları: Satır, Sütun)
+                worksheet.Cell(1, 1).Value = "ID";
+                worksheet.Cell(1, 2).Value = "Demirbaş Adı";
+                worksheet.Cell(1, 3).Value = "Seri No";
+                worksheet.Cell(1, 4).Value = "Kategori";
+                worksheet.Cell(1, 5).Value = "Durum";
+                worksheet.Cell(1, 6).Value = "Fiyat (TL)";
+                worksheet.Cell(1, 7).Value = "Alım Tarihi";
+
+                // Başlık stilini profesyonelleştirelim (Kalın ve Gri Arka Plan)
+                var headerRow = worksheet.Range("A1:G1");
+                headerRow.Style.Font.Bold = true;
+                headerRow.Style.Fill.BackgroundColor = XLColor.LightGray;
+                headerRow.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+
+                // Verileri satır satır döngüyle yazıyoruz
+                int rowCount = 2;
+                foreach (var item in assetList)
+                {
+                    worksheet.Cell(rowCount, 1).Value = item.Id;
+                    worksheet.Cell(rowCount, 2).Value = item.AssetName;
+                    worksheet.Cell(rowCount, 3).Value = item.SerialNo;
+                    worksheet.Cell(rowCount, 4).Value = item.Category?.Name ?? "-";
+                    worksheet.Cell(rowCount, 5).Value = item.Status?.Name ?? "-";
+                    worksheet.Cell(rowCount, 6).Value = item.Price;
+                    worksheet.Cell(rowCount, 7).Value = item.PurchaseDate.ToString("dd.MM.yyyy");
+                    rowCount++;
+                }
+
+                // Sütun genişliklerini içeriğe göre otomatik ayarla (Okunabilirlik için)
+                worksheet.Columns().AdjustToContents();
+
+                // 3. Dosyayı kullanıcıya gönderiyoruz
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+
+                    // Dosya ismine tarih ve saat ekleyerek benzersiz yapalım
+                    string fileName = $"AssetGuard_Envanter_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+
+                    return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                }
+            }
         }
     }
 }
