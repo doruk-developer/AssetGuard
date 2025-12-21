@@ -17,4 +17,8 @@
     <ProjectReference Include="..\AssetGuard.Entity\AssetGuard.Entity.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\img\assets\" />
+  </ItemGroup>
+
 </Project>

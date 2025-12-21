@@ -22,6 +22,7 @@
             <thead>
                 <tr>
                     <th style="width: 5%">ID</th>
+                    <th style="width: 8%">Görsel</th>
                     <th style="width: 25%">Ürün Adı</th>
                     <th style="width: 15%">Kategori</th>
                     <th>Seri No</th>
@@ -35,6 +36,18 @@
                 {
                     <tr>
                         <td>@item.Id</td>
+
+                        <td>
+                            @{
+                                var listImg = string.IsNullOrWhiteSpace(item.ImageUrl)
+                                ? "/img/no-image.png"
+                                : "/img/assets/" + item.ImageUrl;
+                            }
+                            <img src="@listImg"
+                                 style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;"
+                                 onerror="this.onerror=null;this.src='/img/no-image.png';" /> <!-- DOSYA YOKSA İKONA DÖN -->
+                        </td>
+
                         <td>
                             <strong>@item.AssetName</strong><br />
                             <small class="text-muted">Alım: @item.PurchaseDate.ToString("dd.MM.yyyy")</small>

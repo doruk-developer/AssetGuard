@@ -1,89 +1,129 @@
 ﻿@model AssetGuard.WebUI.Models.AssetAddViewModel
-
 @{
     ViewData["Title"] = "Demirbaş Düzenle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="card card-warning">
-            <!-- Düzenleme olduğu için Sarı (Warning) renk -->
-            <div class="card-header">
-                <h3 class="card-title">Demirbaş Düzenleme Formu</h3>
-            </div>
+<!-- LOCAL DROPIFY CSS -->
+<link rel="stylesheet" href="~/plugins/dropify/css/dropify.min.css" />
 
-            <form method="post">
-                <div class="card-body">
+<div class="card card-warning">
+    <div class="card-header">
+        <h3 class="card-title">Demirbaş Güncelleme Formu</h3>
+    </div>
 
-                    <!-- !!! ÇOK ÖNEMLİ: Hangi ID'yi güncellediğimizi tutan GİZLİ ALAN !!! -->
-                    <!-- Bu olmazsa sistem yeni kayıt sanar veya hata verir -->
-                    <input type="hidden" asp-for="Asset.Id" />
+    <!-- enctype="multipart/form-data" DOSYA YÜKLEMEK İÇİN ŞARTTIR -->
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
 
-                    <!-- 1. Ürün Adı -->
+        <!-- KRİTİK: ID ve Resim Silme Bilgisini Gizli Taşıyoruz -->
+        <input type="hidden" asp-for="Asset.Id" />
+        <input type="hidden" asp-for="IsImageRemoved" id="isImageRemoved" value="false" />
+
+        <div class="card-body">
+            <div class="row">
+
+                <!-- SOL SÜTUN: Veri Giriş Alanları -->
+                <div class="col-md-6">
                     <div class="form-group">
                         <label>Ürün Adı</label>
-                        <input type="text" class="form-control" asp-for="Asset.AssetName">
+                        <input type="text" asp-for="Asset.AssetName" class="form-control" required />
                     </div>
 
-                    <!-- 2. Seri No -->
                     <div class="form-group">
                         <label>Seri Numarası</label>
-                        <input type="text" class="form-control" asp-for="Asset.SerialNo">
+                        <input type="text" asp-for="Asset.SerialNo" class="form-control" required />
                     </div>
 
                     <div class="row">
-                        <!-- 3. Kategori -->
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Kategori</label>
-                                <select class="form-control" asp-for="Asset.CategoryId">
-                                    @foreach (var item in Model.CategoryList)
-                                    {
-                                        <option value="@item.Id">@item.Name</option>
-                                    }
-                                </select>
+                                <select asp-for="Asset.CategoryId" class="form-control" asp-items="@(new SelectList(Model.CategoryList, "Id", "Name"))"></select>
                             </div>
                         </div>
-
-                        <!-- 4. Durum -->
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Durumu</label>
-                                <select class="form-control" asp-for="Asset.StatusId">
-                                    @foreach (var item in Model.StatusList)
-                                    {
-                                        <option value="@item.Id">@item.Name</option>
-                                    }
-                                </select>
+                                <label>Fiziksel Durum</label>
+                                <select asp-for="Asset.StatusId" class="form-control" asp-items="@(new SelectList(Model.StatusList, "Id", "Name"))"></select>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Fiyat (TL)</label>
+                        <input type="number" step="0.01" asp-for="Asset.Price" class="form-control" />
                     </div>
 
                     <div class="row">
-                        <!-- 5. Fiyat -->
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Fiyat (TL)</label>
-                                <input type="number" step="0.01" class="form-control" asp-for="Asset.Price">
-                            </div>
-                        </div>
-
-                        <!-- 6. Tarih -->
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Alım Tarihi</label>
-                                <input type="date" class="form-control" asp-for="Asset.PurchaseDate">
+                                <input type="date" asp-for="Asset.PurchaseDate" class="form-control"
+                                       value="@Model.Asset.PurchaseDate.ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Garanti Bitiş</label>
+                                <input type="date" asp-for="Asset.WarrantyEndDate" class="form-control"
+                                       value="@(Model.Asset.WarrantyEndDate?.ToString("yyyy-MM-dd"))" />
                             </div>
                         </div>
                     </div>
+                </div> <!-- /Sol Sütun Bitiş -->
+                <!-- SAĞ SÜTUN: Sürükle Bırak Resim Alanı -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Ürün Görseli</label>
+                        @{
+                            // Düzenle tarafında İKON İSTEMİYORUZ: Varsa resim yolu, yoksa boş string
+                            string imagePath = !string.IsNullOrWhiteSpace(Model.Asset.ImageUrl)
+                            ? Url.Content("~/img/assets/" + Model.Asset.ImageUrl)
+                            : "";
+                        }
+                        <input type="file" asp-for="Image" class="dropify" data-height="315"
+                               data-default-file="@imagePath" accept=".jpg,.jpeg,.png" />
 
-                </div>
+                        <small class="text-muted">
+                            <i class="fas fa-mouse-pointer mr-1"></i> Resmi değiştirmek için sürükleyin veya üzerine tıklayın.
+                        </small>
+                    </div>
+                </div> <!-- /Sağ Sütun Bitiş -->
 
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-warning">Güncelle</button>
-                    <a href="/Asset/Index" class="btn btn-secondary">İptal</a>
-                </div>
-            </form>
+            </div> <!-- /Row Bitiş -->
+        </div> <!-- /Card-Body Bitiş -->
+
+        <div class="card-footer">
+            <button type="submit" class="btn btn-warning"><i class="fas fa-sync"></i> Güncelle</button>
+            <a href="/Asset/Index" class="btn btn-secondary">İptal</a>
         </div>
-    </div>
+    </form>
 </div>
+
+@section Scripts {
+    <!-- LOCAL DROPIFY JS -->
+    <script src="~/plugins/dropify/js/dropify.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // "Yeni Ekle" sayfasındaki bozulmayan şablon (tpl) teknolojisini buraya da entegre ediyoruz
+            var drEvent = $('.dropify').dropify({
+                messages: {
+                    'default': 'Resmi buraya sürükleyin veya tıklayın',
+                    'replace': 'Değiştirmek için sürükleyin veya tıklayın',
+                    'remove':  'Kaldır',
+                    'error':   'Bir hata oluştu.'
+                },
+                tpl: {
+                    // Bu özel şablon, zoom yapıldığında yazıların birbirine girmesini engeller
+                    message: '<div class="dropify-message"><span class="file-icon" /> <p style="font-size:16px; margin-top:10px;">{{ default }}</p></div>'
+                }
+            });
+
+            // Kaldır butonuna basıldığında tetiklenen mantık
+            drEvent.on('dropify.afterClear', function(event, element){
+                $('#isImageRemoved').val('true');
+            });
+        });
+    </script>
+}
+
