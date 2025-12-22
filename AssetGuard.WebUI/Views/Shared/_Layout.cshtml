@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
     <!-- overlayScrollbars -->
     <link rel="stylesheet" href="~/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+    <!-- Daterange picker -->
+    <link rel="stylesheet" href="~/plugins/toastr/toastr.css" />
 
     <!-- Google Font (poppins) -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -218,6 +220,50 @@
             }
         });
     </script>
+
+    <!-- Mevcut Toastr JS dosyasını çağırıyoruz -->
+    <script src="~/plugins/toastr/toastr.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Toastr Konfigürasyonu
+            toastr.options = {
+                "closeButton": true,         // Kapatma butonu
+                "progressBar": true,         // Altta dolan çizgi
+                "positionClass": "toast-top-right", // Sağ üstte çıksın
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "4000",           // 4 saniye sonra kapansın
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            // Controller'dan gelen mesajları kontrol et ve patlat
+            var successMessage = '@TempData["Success"]';
+            if (successMessage) {
+                toastr.success(successMessage, "Başarılı");
+            }
+
+            var errorMessage = '@TempData["Error"]';
+            if (errorMessage) {
+                toastr.error(errorMessage, "Hata!");
+            }
+
+            var warningMessage = '@TempData["Warning"]';
+            if (warningMessage) {
+                toastr.warning(warningMessage, "Dikkat");
+            }
+
+            var infoMessage = '@TempData["Info"]';
+            if (infoMessage) {
+                toastr.info(infoMessage, "Bilgi");
+            }
+        });
+    </script>
+
 </body>
 
 

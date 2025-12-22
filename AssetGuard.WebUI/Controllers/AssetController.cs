@@ -67,6 +67,9 @@ namespace AssetGuard.WebUI.Controllers
             }
 
             _assetService.TAdd(model.Asset);
+
+            // Toast vasıtasıyla başarılı ekleme bildirimi (TempData kullanarak)
+            TempData["Success"] = "Yeni demirbaş envantere başarıyla kaydedildi.";
             return RedirectToAction("Index");
         }
 
@@ -93,6 +96,7 @@ namespace AssetGuard.WebUI.Controllers
                 CategoryList = _categoryService.TGetAll(),
                 StatusList = _assetStatusService.TGetAll()
             };
+
             return View(model);
         }
 
@@ -157,23 +161,36 @@ namespace AssetGuard.WebUI.Controllers
             // Artık model.Asset'i (yabancıyı) değil, assetToUpdate'i (tanıdığı) gönderiyoruz.
             _assetService.TUpdate(assetToUpdate);
 
+            // Toast vasıtasıyla başarılı güncelleme bildirimi (TempData kullanarak)
+            TempData["Info"] = "Demirbaş bilgileri güncellendi.";
             return RedirectToAction("Index");
         }
 
         // 6. SİLME
         public IActionResult Delete(int id)
         {
-            var value = _assetService.TGetById(id);
-            if (value != null)
+            try
             {
-                // Ürün silinirken dosyasını da diskten temizle
-                if (!string.IsNullOrWhiteSpace(value.ImageUrl))
+                var value = _assetService.TGetById(id);
+                if (value != null)
                 {
-                    var path = Path.Combine(_hostEnvironment.WebRootPath, "img/assets", value.ImageUrl);
-                    if (System.IO.File.Exists(path)) { System.IO.File.Delete(path); }
+                    // Resim silme kodun burada kalsın...
+                    if (!string.IsNullOrWhiteSpace(value.ImageUrl))
+                    {
+                        var path = Path.Combine(_hostEnvironment.WebRootPath, "img/assets", value.ImageUrl);
+                        if (System.IO.File.Exists(path)) { System.IO.File.Delete(path); }
+                    }
+
+                    _assetService.TDelete(value);
+                    TempData["Warning"] = "Demirbaş kaydı başarıyla silindi.";
                 }
-                _assetService.TDelete(value);
             }
+            catch (Exception)
+            {
+                // İŞTE BURASI SİSTEMİ KURTARAN YER
+                TempData["Error"] = "Bu demirbaş silinemez! Çünkü bu ürüne ait zimmet hareketleri/geçmişi bulunmaktadır. Önce geçmiş kayıtları temizlemelisiniz.";
+            }
+
             return RedirectToAction("Index");
         }
 

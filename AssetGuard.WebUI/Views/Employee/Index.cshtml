@@ -1,8 +1,9 @@
 ﻿@using AssetGuard.Entity
-@model List<Employee>
+@model AssetGuard.WebUI.Models.EmployeeListViewModel
 
 @{
     ViewData["Title"] = "Personel Listesi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="card">
@@ -27,22 +28,24 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model)
+                @foreach (var item in Model.Employees)
                 {
                     <tr>
                         <td>@item.Id</td>
-                        <td><strong>@item.FirstName @item.LastName</strong></td>
-                        <td><span class="badge badge-secondary">@item.Department.Name</span></td>
-                        <td><span class="badge badge-success">Aktif</span></td> <!-- Zimmet Durumu Eklenecek -->
+                        <td>
+                            <strong>@item.FirstName @item.LastName</strong>
+                        </td>
+                        <td>
+                            <span class="badge badge-secondary">@item.Department?.Name</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-success">Aktif</span>
+                        </td>
                         <td class="project-actions text-right">
-                            <!-- (Personel) Düzenleme Linki -->
                             <a class="btn btn-info btn-sm" href="/Employee/Edit/@item.Id">
                                 <i class="fas fa-pencil-alt"></i> Düzenle
                             </a>
-
-                            <!-- (Personel) Silme Linki -->
-                            <a class="btn btn-danger btn-sm"
-                               href="/Employee/Delete/@item.Id"
+                            <a class="btn btn-danger btn-sm" href="/Employee/Delete/@item.Id"
                                onclick="return confirm('@item.FirstName @item.LastName isimli personeli silmek istediğinize emin misiniz?');">
                                 <i class="fas fa-trash"></i> Sil
                             </a>
@@ -53,3 +56,64 @@
         </table>
     </div>
 </div>
+
+<!-- ================================================= -->
+<!-- PERSONEL HATA MODALI (Zimmetleri Gösteren Kısım) -->
+<!-- ================================================= -->
+@if (Model.ErrorInfo != null)
+{
+    <div class="modal fade" id="deleteErrorModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-danger">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> @Model.ErrorInfo.EntityName Silinemedi!
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="background-color: white; color: black;">
+                    <p class="lead text-danger font-weight-bold">@Model.ErrorInfo.ErrorMessage</p>
+                    <p>Bu personel silinemez! Çünkü üzerinde kayıtlı olan (aktif veya geçmiş) zimmet hareketleri bulunmaktadır:</p>
+
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-bordered table-striped">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Zimmetli Demirbaş ve Tarih</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.ErrorInfo.RelatedItems)
+                                {
+                                    <tr>
+                                        <td><i class="fas fa-handshake text-muted mr-2"></i> @item</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between" style="background-color: #f8f9fa; color: black;">
+                    <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Kapat</button>
+                    <a href="/Assignment/Index" class="btn btn-danger">Zimmet Geçmişine Git</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Controller'dan hata bilgisi geldiyse modalı patlat
+            @if (Model.ErrorInfo != null)
+            {
+                    <text>
+                        $('#deleteErrorModal').modal('show');
+                    </text>
+            }
+        });
+    </script>
+}
