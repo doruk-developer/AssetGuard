@@ -179,15 +179,16 @@ namespace AssetGuard.WebUI.Controllers
 
         public IActionResult ExportExcel()
         {
-            // 1. Verileri veritabanından çekiyoruz
+            // 1. Verileri Çek
             var assetList = _assetService.TGetAll();
+            int totalRows = assetList.Count;
+            int colCount = 7; // ID, Ad, Seri No, Kategori, Durum, Fiyat, Tarih
 
-            // 2. Bellekte bir Excel dosyası oluşturuyoruz
             using (var workbook = new XLWorkbook())
             {
                 var worksheet = workbook.Worksheets.Add("Envanter Listesi");
 
-                // Başlıkları yazıyoruz (Hücre koordinatları: Satır, Sütun)
+                // --- BAŞLIKLAR ---
                 worksheet.Cell(1, 1).Value = "ID";
                 worksheet.Cell(1, 2).Value = "Demirbaş Adı";
                 worksheet.Cell(1, 3).Value = "Seri No";
@@ -196,13 +197,7 @@ namespace AssetGuard.WebUI.Controllers
                 worksheet.Cell(1, 6).Value = "Fiyat (TL)";
                 worksheet.Cell(1, 7).Value = "Alım Tarihi";
 
-                // Başlık stilini profesyonelleştirelim (Kalın ve Gri Arka Plan)
-                var headerRow = worksheet.Range("A1:G1");
-                headerRow.Style.Font.Bold = true;
-                headerRow.Style.Fill.BackgroundColor = XLColor.LightGray;
-                headerRow.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-
-                // Verileri satır satır döngüyle yazıyoruz
+                // --- VERİLERİ DOLDUR ---
                 int rowCount = 2;
                 foreach (var item in assetList)
                 {
@@ -211,23 +206,60 @@ namespace AssetGuard.WebUI.Controllers
                     worksheet.Cell(rowCount, 3).Value = item.SerialNo;
                     worksheet.Cell(rowCount, 4).Value = item.Category?.Name ?? "-";
                     worksheet.Cell(rowCount, 5).Value = item.Status?.Name ?? "-";
+
+                    // Fiyat Formatı
                     worksheet.Cell(rowCount, 6).Value = item.Price;
+                    worksheet.Cell(rowCount, 6).Style.NumberFormat.Format = "#,##0.00 \"TL\"";
+
+                    // Tarih Formatı
                     worksheet.Cell(rowCount, 7).Value = item.PurchaseDate.ToString("dd.MM.yyyy");
+
                     rowCount++;
                 }
 
-                // Sütun genişliklerini içeriğe göre otomatik ayarla (Okunabilirlik için)
-                worksheet.Columns().AdjustToContents();
+                // --- GÖRSEL STİLLENDİRME (Zebra & Çerçeve) ---
+                if (totalRows > 0)
+                {
+                    var reportRange = worksheet.Range(1, 1, totalRows + 1, colCount);
 
-                // 3. Dosyayı kullanıcıya gönderiyoruz
+                    // 1. Başlık Stili: Koyu Mavi Üstüne Beyaz Yazı
+                    var header = worksheet.Range(1, 1, 1, colCount);
+                    header.Style.Font.Bold = true;
+                    header.Style.Fill.BackgroundColor = XLColor.FromHtml("#2F5597"); // Dark Blue
+                    header.Style.Font.FontColor = XLColor.White;
+                    header.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    // 2. Zebra Striping & İçerik Hizalama
+                    for (int i = 2; i <= totalRows + 1; i++)
+                    {
+                        // Dikeyde Ortala
+                        worksheet.Row(i).Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                        if (i % 2 == 0) // Çift satırları Buz Mavisi yap
+                        {
+                            worksheet.Range(i, 1, i, colCount).Style.Fill.BackgroundColor = XLColor.FromHtml("#E3EFFD");
+                        }
+                    }
+
+                    // 3. Kenarlıklar
+                    // İç çizgiler (İnce gri)
+                    reportRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                    reportRange.Style.Border.InsideBorderColor = XLColor.LightGray;
+
+                    // Dış Çerçeve (Kalın Siyah)
+                    reportRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
+                    reportRange.Style.Border.OutsideBorderColor = XLColor.Black;
+
+                    // 4. Sütun Genişliklerini Ayarla
+                    worksheet.Columns(1, colCount).AdjustToContents();
+                }
+
+                // --- DOSYAYI GÖNDER ---
                 using (var stream = new MemoryStream())
                 {
                     workbook.SaveAs(stream);
                     var content = stream.ToArray();
-
-                    // Dosya ismine tarih ve saat ekleyerek benzersiz yapalım
                     string fileName = $"AssetGuard_Envanter_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
-
                     return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
                 }
             }
