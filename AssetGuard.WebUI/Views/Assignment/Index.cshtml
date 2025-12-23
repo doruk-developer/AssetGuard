@@ -1,55 +1,103 @@
-﻿@*
-    Atamaları görüntülememizi sağlayan Index sayfasıdır.
-*@
-
-
-@using AssetGuard.Entity
+﻿@using AssetGuard.Entity
 @model List<Assignment>
 
 @{
-    ViewData["Title"] = "Zimmet Hareket Geçmişi";
+    ViewData["Title"] = "Zimmet Hareketleri";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
+    table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
+    table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
+        display: none !important;
+    }
+
+    #tblAssignments thead th {
+        cursor: pointer;
+        transition: 0.2s;
+        padding: 12px 8px !important;
+    }
+
+        #tblAssignments thead th:hover {
+            background-color: #f4f6f9;
+            color: #007bff;
+            text-decoration: underline;
+        }
+</style>
+
 <div class="card">
-    <div class="card-header border-transparent">
-        <h3 class="card-title">Tüm Zimmet Kayıtları</h3>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table m-0 table-hover">
-                <thead>
-                    <tr>
-                        <th>Hareket ID</th>
-                        <th>Personel</th>
-                        <th>Ürün / Seri No</th>
-                        <th>Veriliş Tarihi</th>
-                        <th>İade Durumu</th>
-                        <th>Notlar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>#@item.Id</td>
-                            <td><strong>@item.Employee?.FirstName @item.Employee?.LastName</strong></td>
-                            <td>@item.Asset?.AssetName <small class="text-muted">(@item.Asset?.SerialNo)</small></td>
-                            <td>@item.AssignedDate.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td>
-                                @if (item.ReturnDate == null)
-                                {
-                                    <span class="badge badge-success">Aktif Zimmet</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-secondary">İade Edildi (@item.ReturnDate?.ToString("dd.MM.yyyy"))</span>
-                                }
-                            </td>
-                            <td>@item.Notes</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    <div class="card-header border-0">
+        <h3 class="card-title">Zimmet Geçmişi</h3>
+        <div class="card-tools">
+            <a href="/Assignment/Create" class="btn btn-primary btn-sm"><i class="fas fa-handshake"></i> Yeni Zimmet Ata</a>
         </div>
     </div>
+    <div class="card-body p-0">
+        <table id="tblAssignments" class="table table-striped projects table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 5%">ID</th>
+                    <th style="width: 20%">Personel</th>
+                    <th style="width: 25%">Demirbaş</th>
+                    <th style="width: 15%">Veriliş Tarihi</th>
+                    <th style="width: 15%">İade Tarihi</th>
+                    <th style="width: 10%">Durum</th>
+                    <th style="width: 10%">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.Employee?.FirstName @item.Employee?.LastName</td>
+                        <td>@item.Asset?.AssetName <br /> <small class="text-muted">@item.Asset?.SerialNo</small></td>
+
+                        <!-- TARİH SIRALAMASI İÇİN data-order KULLANIYORUZ -->
+                        <td data-order="@item.AssignedDate.ToString("yyyyMMdd")">
+                            @item.AssignedDate.ToString("dd.MM.yyyy")
+                        </td>
+
+                        <td data-order="@(item.ReturnDate.HasValue? item.ReturnDate.Value.ToString("yyyyMMdd") : "0")">
+                            @(item.ReturnDate.HasValue? item.ReturnDate.Value.ToString("dd.MM.yyyy") : "-")
+                        </td>
+
+                        <td>
+                            @if (item.ReturnDate == null)
+                            {
+                                <span class="badge badge-success">Aktif</span>
+                            }
+                            else
+                            {
+
+                                <span class="badge badge-secondary">İade Alındı</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (item.ReturnDate == null)
+                            {
+                                <a href="/Assignment/Return/@item.Id" class="btn btn-warning btn-sm"><i class="fas fa-undo"></i> İade Al</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
+
+@section Scripts {
+    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#tblAssignments").DataTable({
+                "responsive": true, "autoWidth": false,
+                "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" },
+                "order": [[3, "desc"]] // Veriliş Tarihine göre en yeniden eskiye
+            });
+        });
+    </script>
+}

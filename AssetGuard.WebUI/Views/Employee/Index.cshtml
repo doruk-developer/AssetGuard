@@ -6,49 +6,67 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    /* DataTables Oklarını Gizle */
+    table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
+    table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
+    table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
+        display: none !important;
+    }
+
+    /* Veri Başlıkları: Tıklanabilir */
+    #tblEmployees thead th:not(.no-export) {
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+        #tblEmployees thead th:not(.no-export):hover {
+            background-color: #f4f6f9 !important;
+            color: #007bff;
+        }
+
+    /* İşlemler Başlığı: Statik */
+    #tblEmployees thead th.no-export {
+        cursor: default !important;
+        pointer-events: none;
+        color: #aaa !important;
+    }
+
+    #tblEmployees thead th.sorting_asc, #tblEmployees thead th.sorting_desc {
+        color: #007bff;
+        border-bottom: 2px solid #007bff !important;
+    }
+</style>
+
 <div class="card">
-    <div class="card-header">
+    <div class="card-header border-0">
         <h3 class="card-title">Aktif Personel Kayıtları</h3>
         <div class="card-tools">
-            <a href="/Employee/Create" class="btn btn-primary btn-sm">
-                <i class="fas fa-user-plus"></i> Yeni Personel Ekle
-            </a>
+            <a href="/Employee/Create" class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Yeni Personel</a>
         </div>
     </div>
-
     <div class="card-body p-0">
-        <table class="table table-striped projects table-hover">
+        <table id="tblEmployees" class="table table-striped projects table-hover m-0">
             <thead>
                 <tr>
-                    <th style="width: 5%">ID</th>
-                    <th style="width: 25%">Ad Soyad</th>
-                    <th style="width: 20%">Departman</th>
-                    <th style="width: 15%">Durum</th>
-                    <th style="width: 20%">İşlemler</th>
+                    <th style="display:none;">ID</th>
+                    <th style="width: 30%">Ad Soyad</th>
+                    <th style="width: 25%">Departman</th>
+                    <th style="width: 20%">Durum</th>
+                    <th class="text-right no-export">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model.Employees)
                 {
                     <tr>
-                        <td>@item.Id</td>
-                        <td>
-                            <strong>@item.FirstName @item.LastName</strong>
-                        </td>
-                        <td>
-                            <span class="badge badge-secondary">@item.Department?.Name</span>
-                        </td>
-                        <td>
-                            <span class="badge badge-success">Aktif</span>
-                        </td>
-                        <td class="project-actions text-right">
-                            <a class="btn btn-info btn-sm" href="/Employee/Edit/@item.Id">
-                                <i class="fas fa-pencil-alt"></i> Düzenle
-                            </a>
-                            <a class="btn btn-danger btn-sm" href="/Employee/Delete/@item.Id"
-                               onclick="return confirm('@item.FirstName @item.LastName isimli personeli silmek istediğinize emin misiniz?');">
-                                <i class="fas fa-trash"></i> Sil
-                            </a>
+                        <td style="display:none;">@item.Id</td>
+                        <td><strong>@item.FirstName @item.LastName</strong></td>
+                        <td><span class="badge badge-secondary">@item.Department?.Name</span></td>
+                        <td><span class="badge badge-success">Aktif</span></td>
+                        <td class="text-right">
+                            <a class="btn btn-info btn-sm" href="/Employee/Edit/@item.Id"><i class="fas fa-pencil-alt"></i></a>
+                            <a class="btn btn-danger btn-sm" href="/Employee/Delete/@item.Id" onclick="return confirm('Personel silinsin mi?');"><i class="fas fa-trash"></i></a>
                         </td>
                     </tr>
                 }
@@ -57,62 +75,51 @@
     </div>
 </div>
 
-<!-- ================================================= -->
-<!-- PERSONEL HATA MODALI (Zimmetleri Gösteren Kısım) -->
-<!-- ================================================= -->
+<!-- HATA MODALI -->
 @if (Model.ErrorInfo != null)
 {
     <div class="modal fade" id="deleteErrorModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg text-dark">
             <div class="modal-content bg-danger">
                 <div class="modal-header">
-                    <h4 class="modal-title">
-                        <i class="fas fa-exclamation-triangle mr-2"></i> @Model.ErrorInfo.EntityName Silinemedi!
-                    </h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h4 class="modal-title"><i class="fas fa-hand-holding-usd mr-2"></i> @Model.ErrorInfo.EntityName Silinemedi!</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
-                <div class="modal-body" style="background-color: white; color: black;">
+                <div class="modal-body bg-white">
                     <p class="lead text-danger font-weight-bold">@Model.ErrorInfo.ErrorMessage</p>
-                    <p>Bu personel silinemez! Çünkü üzerinde kayıtlı olan (aktif veya geçmiş) zimmet hareketleri bulunmaktadır:</p>
-
-                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                        <table class="table table-sm table-bordered table-striped">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Zimmetli Demirbaş ve Tarih</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model.ErrorInfo.RelatedItems)
-                                {
-                                    <tr>
-                                        <td><i class="fas fa-handshake text-muted mr-2"></i> @item</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="table table-sm table-bordered">
+                        <thead><tr><th>Üzerindeki Zimmetli Ürünler</th></tr></thead>
+                        <tbody>
+                            @foreach (var item in Model.ErrorInfo.RelatedItems)
+                            {
+                                <tr><td>@item</td></tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-                <div class="modal-footer justify-content-between" style="background-color: #f8f9fa; color: black;">
-                    <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Kapat</button>
-                    <a href="/Assignment/Index" class="btn btn-danger">Zimmet Geçmişine Git</a>
-                </div>
+                <div class="modal-footer bg-light"><button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button></div>
             </div>
         </div>
     </div>
 }
 
 @section Scripts {
+    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function () {
-            // Controller'dan hata bilgisi geldiyse modalı patlat
+            $("#tblEmployees").DataTable({
+                "responsive": true, "autoWidth": false,
+                "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" },
+                "order": [[1, "asc"]],
+                "columnDefs": [
+                    { "targets": [0], "visible": false },
+                    { "targets": [4], "orderable": false, "searchable": false }
+                ]
+            });
             @if (Model.ErrorInfo != null)
             {
-                    <text>
-                        $('#deleteErrorModal').modal('show');
-                    </text>
+                <text>$('#deleteErrorModal').modal('show');</text>
             }
         });
     </script>
