@@ -6,8 +6,11 @@
 
 
 using AssetGuard.Business.Abstract;
+using AssetGuard.Entity;
 using AssetGuard.WebUI.Models;
 using ClosedXML.Excel; // Excel çıktısı alabilmek için
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssetGuard.WebUI.Controllers
@@ -18,16 +21,19 @@ namespace AssetGuard.WebUI.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IAssetStatusService _assetStatusService;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly IValidator<Asset> _assetValidator;
 
         public AssetController(IAssetService assetService,
                                ICategoryService categoryService,
                                IAssetStatusService assetStatusService,
-                               IWebHostEnvironment hostEnvironment)
+                               IWebHostEnvironment hostEnvironment,
+                               IValidator<Asset> assetValidator)
         {
             _assetService = assetService;
             _categoryService = categoryService;
             _assetStatusService = assetStatusService;
             _hostEnvironment = hostEnvironment;
+            _assetValidator = assetValidator;
         }
 
         // 1. LİSTELEME
@@ -53,6 +59,24 @@ namespace AssetGuard.WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(AssetAddViewModel model)
         {
+            // --- VALİDASYON BAŞLANGIÇ ---
+            ValidationResult result = await _assetValidator.ValidateAsync(model.Asset);
+
+            if (!result.IsValid)
+            {
+                foreach (var error in result.Errors)
+                {
+                    // View tarafında asp-for="Asset.AssetName" olduğu için prefix ekliyoruz
+                    ModelState.AddModelError("Asset." + error.PropertyName, error.ErrorMessage);
+                }
+
+                // Hata durumunda Dropdownları tekrar doldur
+                model.CategoryList = _categoryService.TGetAll();
+                model.StatusList = _assetStatusService.TGetAll();
+                return View(model);
+            }
+            // --- VALİDASYON BİTİŞ ---
+
             if (model.Image != null)
             {
                 string extension = Path.GetExtension(model.Image.FileName);

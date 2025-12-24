@@ -4,79 +4,51 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AssetGuard.DataAccess.Context
 {
-    // IdentityDbContext<AppUser> olmalı!
-    public partial class ZimmetContext : IdentityDbContext<AppUser>
+    public class ZimmetContext : IdentityDbContext<AppUser>
     {
-        public ZimmetContext()
+        // --- KRİTİK CONSTRUCTOR ---
+        // Program.cs'deki "options.UseSqlServer" ayarını içeri alan kapı burasıdır.
+        public ZimmetContext(DbContextOptions<ZimmetContext> options) : base(options)
         {
         }
 
-        public ZimmetContext(DbContextOptions<ZimmetContext> options)
-            : base(options)
-        {
-        }
+        // Tablolar
+        public DbSet<Asset> Assets { get; set; }
+        public DbSet<AssetStatus> AssetStatuses { get; set; }
+        public DbSet<Assignment> Assignments { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        
+        // Raporlama için View veya Tablo varsa buraya eklenir, yoksa kalabilir.
 
-        // Mevcut Tablolar
-        public virtual DbSet<Asset> Assets { get; set; }
-        public virtual DbSet<AssetStatus> AssetStatuses { get; set; }
-        public virtual DbSet<Assignment> Assignments { get; set; }
-        public virtual DbSet<Category> Categories { get; set; }
-        public virtual DbSet<Department> Departments { get; set; }
-        public virtual DbSet<Employee> Employees { get; set; }
-
+        // Bağlantı adresi artık dışarıdan geldiği için burayı boş bırakıyoruz.
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // Bağlantı adresi (Senin bilgisayarın için doğru olan)
-                optionsBuilder.UseSqlServer("Server=WORK-COMPUTER\\SQLDEV_2022;Database=ZimmetDB;Trusted_Connection=True;TrustServerCertificate=True;");
-            }
+            // Buraya kod yazmana gerek yok.
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            // !!! KRİTİK NOKTA !!!
-            // Bu satır Identity (Login) tablolarını oluşturur. En başta olmalı.
-            base.OnModelCreating(modelBuilder);
+            // Identity tabloları için gerekli
+            base.OnModelCreating(builder);
 
-            // Tablo isimlerini sabitleme (ToTable)
-            modelBuilder.Entity<AssetStatus>().ToTable("AssetStatus");
-            modelBuilder.Entity<Category>().ToTable("Categories");
-            modelBuilder.Entity<Department>().ToTable("Departments");
-            modelBuilder.Entity<Employee>().ToTable("Employees");
-            modelBuilder.Entity<Assignment>().ToTable("Assignments");
-            modelBuilder.Entity<Asset>().ToTable("Assets");
+            // Tablo İsimlerini Sabitleme
+            builder.Entity<Asset>().ToTable("Assets");
+            builder.Entity<AssetStatus>().ToTable("AssetStatus");
+            builder.Entity<Assignment>().ToTable("Assignments");
+            builder.Entity<Category>().ToTable("Categories");
+            builder.Entity<Department>().ToTable("Departments");
+            builder.Entity<Employee>().ToTable("Employees");
 
-            // Mevcut Fluent API kodların...
-            modelBuilder.Entity<Asset>(entity =>
+            // Özel Ayarlar (Fluent API)
+            builder.Entity<Asset>(entity =>
             {
-                entity.HasKey(e => e.Id).HasName("PK__Assets__3214EC27DA32BCBB");
-                entity.HasIndex(e => e.SerialNo, "UQ__Assets__SerialNo").IsUnique();
-                entity.Property(e => e.Id).HasColumnName("ID");
-                entity.Property(e => e.AssetName).HasMaxLength(100);
-                entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
-                entity.Property(e => e.ImageUrl).HasMaxLength(250);
-                entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
-                entity.Property(e => e.PurchaseDate).HasDefaultValueSql("(getdate())");
-                // entity.Property(e => e.ReturnDate) <-- Bunu silmiştik, hata veriyordu.
-                entity.Property(e => e.SerialNo).HasMaxLength(50);
-                entity.Property(e => e.StatusId).HasColumnName("StatusID");
-                entity.Property(e => e.WarrantyEndDate).HasColumnType("datetime");
-
-                entity.HasOne(d => d.Category).WithMany(p => p.Assets)
-                    .HasForeignKey(d => d.CategoryId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Assets_Categories");
-
-                entity.HasOne(d => d.Status).WithMany(p => p.Assets)
-                    .HasForeignKey(d => d.StatusId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Assets_Status");
+                // Seri No benzersiz olsun
+                entity.HasIndex(e => e.SerialNo).IsUnique(); 
+                // Fiyat hassasiyeti
+                entity.Property(e => e.Price).HasColumnType("decimal(18,2)"); 
             });
-
-            OnModelCreatingPartial(modelBuilder);
         }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

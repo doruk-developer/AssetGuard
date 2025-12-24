@@ -20,15 +20,33 @@
                     <div class="form-group">
                         <label>Adı</label>
                         <input type="text" class="form-control" asp-for="Employee.FirstName" placeholder="Örn: Ayşe">
+                        <!-- Validasyon hata mesajı -->
+                        <span asp-validation-for="Employee.FirstName" class="text-danger small font-weight-bold"></span>
                     </div>
+                    
 
                     <!-- 2. Soyad -->
                     <div class="form-group">
                         <label>Soyadı</label>
                         <input type="text" class="form-control" asp-for="Employee.LastName" placeholder="Örn: Demir">
+                        <!-- Validasyon hata mesajı -->
+                        <span asp-validation-for="Employee.LastName" class="text-danger small font-weight-bold"></span>
+                    </div>
+                    
+                    <!-- 3. Email -->
+                    <div class="form-group">
+                        <label>E-Posta Adresi</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            </div>
+                            <input type="email" class="form-control" asp-for="Employee.Email" placeholder="ornek@sirket.com">
+                        </div>
+                        <!-- Validasyon hata mesajı -->
+                        <span asp-validation-for="Employee.Email" class="text-danger small font-weight-bold" style="display:block; margin-top:5px;"></span>
                     </div>
 
-                    <!-- 3. Departman (DROPDOWN) -->
+                    <!-- 4. Departman (DROPDOWN) -->
                     <div class="form-group">
                         <label>Departman Seçin</label>
                         <!-- Seçilen ID, Employee.DepartmentID içine gidecek -->

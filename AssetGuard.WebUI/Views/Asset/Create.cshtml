@@ -63,10 +63,10 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Garanti Bitiş Tarihi</label>
-                                <input type="date" asp-for="Asset.WarrantyEndDate" class="form-control" />
-                            </div>
+                            <label>Garanti Bitiş Tarihi</label>
+                            <input type="date" asp-for="Asset.WarrantyEndDate" class="form-control" />
+                            <!-- Validation Uyarısı Kodu -->
+                            <span asp-validation-for="Asset.WarrantyEndDate" class="text-danger small font-weight-bold"></span>
                         </div>
                     </div>
 

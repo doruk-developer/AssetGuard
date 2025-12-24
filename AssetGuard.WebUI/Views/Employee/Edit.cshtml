@@ -2,37 +2,51 @@
 
 @{
     ViewData["Title"] = "Personel Düzenle";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="row">
     <div class="col-md-8">
         <div class="card card-warning">
-            <!-- Düzenleme olduğu için Sarı renk -->
             <div class="card-header">
                 <h3 class="card-title">Personel Bilgilerini Güncelle</h3>
             </div>
 
             <form method="post">
+                <!-- ID'yi gizli taşıyoruz -->
+                <input type="hidden" asp-for="Employee.Id" />
+
                 <div class="card-body">
-
-                    <!-- !!! KRİTİK: Güncellenecek Kaydın ID'si !!! -->
-                    <input type="hidden" asp-for="Employee.Id" />
-
                     <!-- 1. Ad -->
                     <div class="form-group">
                         <label>Adı</label>
-                        <input type="text" class="form-control" asp-for="Employee.FirstName">
+                        <input type="text" class="form-control" asp-for="Employee.FirstName" required>
+                        <span asp-validation-for="Employee.FirstName" class="text-danger small font-weight-bold"></span>
                     </div>
 
                     <!-- 2. Soyad -->
                     <div class="form-group">
                         <label>Soyadı</label>
-                        <input type="text" class="form-control" asp-for="Employee.LastName">
+                        <input type="text" class="form-control" asp-for="Employee.LastName" required>
+                        <span asp-validation-for="Employee.LastName" class="text-danger small font-weight-bold"></span>
                     </div>
 
-                    <!-- 3. Departman (DROPDOWN) -->
+                    <!-- 3. E-Posta (EKSİK OLAN KISIM BURASIYDI) -->
+                    <div class="form-group">
+                        <label>E-Posta Adresi</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            </div>
+                            <input type="email" class="form-control" asp-for="Employee.Email" placeholder="isim@assetguard.com">
+                        </div>
+                        <span asp-validation-for="Employee.Email" class="text-danger small font-weight-bold" style="display:block; margin-top:5px;"></span>
+                    </div>
+
+                    <!-- 4. Departman -->
                     <div class="form-group">
                         <label>Departman</label>
+                        <!-- DÜZELTME: 'DepartmentID' yerine 'DepartmentId' yazıldı -->
                         <select class="form-control" asp-for="Employee.DepartmentId">
                             @foreach (var item in Model.DepartmentList)
                             {
@@ -40,7 +54,6 @@
                             }
                         </select>
                     </div>
-
                 </div>
 
                 <div class="card-footer">

@@ -7,58 +7,81 @@ using AssetGuard.DataAccess.Abstract;
 using AssetGuard.DataAccess.Concrete;
 using AssetGuard.DataAccess.Context;
 using AssetGuard.Entity;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Data.SqlClient; // Baðlantý testi için gerekli
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args); // ÖNCE BUILDER OLUÞTURULUR
+var builder = WebApplication.CreateBuilder(args);
 
-// --- N-Tier Baðlantýlarýný Kurma (Dependency Injection) ---
-// BU KODLAR BUILDER OLUÞTURULDUKTAN SONRA GELMELÝDÝR
-// Çünkü builder.Services'a eriþim/emir verebilmek için önce builder'ýn tanýmlanmasý gerekir. 
+// =========================================================
+// 1. AKILLI BAÐLANTI SEÇÝCÝ (AUTO-DISCOVERY)
+// =========================================================
+string validConnectionString = null;
+var connectionStrings = builder.Configuration.GetSection("ConnectionStrings").GetChildren();
 
-// 1. Veritabaný Baðlantýsý (Context)
-builder.Services.AddDbContext<ZimmetContext>(options =>
+Console.WriteLine(">>> Veritabaný baðlantýsý aranýyor...");
+
+foreach (var conn in connectionStrings)
 {
-    options.UseSqlServer("Server=WORK-COMPUTER\\SQLDEV_2022;Database=ZimmetDB;Trusted_Connection=True;TrustServerCertificate=True;");
-});
+    string testConnString = conn.Value;
+    try
+    {
+        // 1 saniyelik hýzlý bir baðlantý testi yapýyoruz
+        using (var connection = new SqlConnection(testConnString))
+        {
+            // Baðlantý zaman aþýmýný kýsa tutuyoruz ki bekletmesin
+            var builderConn = new SqlConnectionStringBuilder(testConnString) { ConnectTimeout = 2 };
+            connection.ConnectionString = builderConn.ConnectionString;
 
-// 2. Business ve DataAccess Servislerini Kaydetme
+            connection.Open(); // Baðlanmayý dene
+            validConnectionString = testConnString; // Baþarýlýysa bunu seç
+            Console.WriteLine($">>> BAÞARILI! Baðlanýlan Sunucu: {conn.Key}");
+            break; // Döngüden çýk
+        }
+    }
+    catch
+    {
+        Console.WriteLine($"--- Baþarýsýz: {conn.Key} (Sunucu yok veya ulaþýlamýyor)");
+        continue; // Sýradakini dene
+    }
+}
+
+if (string.IsNullOrEmpty(validConnectionString))
+{
+    // Hiçbiri çalýþmazsa en güvenli liman LocalDB'ye veya Default'a düþ
+    validConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    Console.WriteLine(">>> UYARI: Hiçbir özel sunucu bulunamadý. Varsayýlan ayar kullanýlýyor.");
+}
+
+// Seçilen çalýþan adresi Context'e veriyoruz
+builder.Services.AddDbContext<ZimmetContext>(options => options.UseSqlServer(validConnectionString));
+// =========================================================
+
+
+// --- 2. DEPENDENCY INJECTION (DI) ---
 builder.Services.AddScoped<IAssetService, AssetManager>();
 builder.Services.AddScoped<IAssetDal, EfAssetDal>();
-
-// --- Lookup Servisleri ---
 builder.Services.AddScoped<ICategoryService, CategoryManager>();
 builder.Services.AddScoped<ICategoryDal, EfCategoryDal>();
-
 builder.Services.AddScoped<IAssetStatusService, AssetStatusManager>();
 builder.Services.AddScoped<IAssetStatusDal, EfAssetStatusDal>();
-
-// --- Employee-Zimmetleme Servisleri ---
 builder.Services.AddScoped<IEmployeeService, EmployeeManager>();
 builder.Services.AddScoped<IEmployeeDal, EfEmployeeDal>();
-
-// --- Zimmet Ata Servisleri ---
 builder.Services.AddScoped<IAssignmentService, AssignmentManager>();
 builder.Services.AddScoped<IAssignmentDal, EfAssignmentDal>();
-
-// --- Departman Servisleri ---
 builder.Services.AddScoped<IDepartmentService, DepartmentManager>();
 builder.Services.AddScoped<IDepartmentDal, EfDepartmentDal>();
-
-// --- Rapor Servisleri ---
 builder.Services.AddScoped<IReportService, ReportManager>();
 builder.Services.AddScoped<IReportDal, EfReportDal>();
-
-// --- Kullanýcý Servisleri ---
 builder.Services.AddScoped<IEmailService, EmailManager>();
 
-// --- 1. IDENTITY SERVISLERINI EKLE ---
+// --- 3. IDENTITY ---
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
-    // Parola kurallarýný þimdilik esnek tutalým (Geliþtirme aþamasý)
-    options.Password.RequiredLength = 3; // En az 3 karakter
+    options.Password.RequiredLength = 3;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
@@ -67,88 +90,72 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ZimmetContext>()
 .AddDefaultTokenProviders();
 
-// --- 2. LOGIN YÖNLENDÝRME AYARI ---
+// --- 4. GÜVENLÝK AYARLARI ---
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // Giriþ yapmayan buraya gider
+    options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-// Sistemin her yerini otomatik kilitleyen Global Filtre
 builder.Services.AddControllersWithViews(options =>
 {
-    var policy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
+    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 
-var app = builder.Build(); // EN SONRA BUILD EDÝLÝR
+// --- 5. VALIDASYON ---
+builder.Services.AddValidatorsFromAssemblyContaining<AssetGuard.Business.ValidationRules.AssetValidator>();
 
+var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-// --- HATA YÖNETÝMÝ BAÞLANGIÇ ---
-if (!app.Environment.IsDevelopment())
-{
-    // Canlý ortamda (Production) ise 500 hatasýna git
-    app.UseExceptionHandler("/Error/Page500");
-    app.UseHsts();
-}
-else
-{
-    // Geliþtirme ortamýnda (Development) bile olsak, 
-    // testi görmek için geçici olarak bunu açýyoruz.
-    // Normalde burasý app.UseDeveloperExceptionPage(); olur.
-    app.UseExceptionHandler("/Error/Page500"); // <--- TEST ÝÇÝN BUNU AÇTIK
-}
-
-// 404 Hatalarý için (Sayfa bulunamadý)
+// --- 6. HATA YÖNETÝMÝ ---
+// Geliþtirme ortamýnda bile olsak gerçek hata sayfalarýný test etmek için:
+app.UseExceptionHandler("/Error/Page500");
 app.UseStatusCodePagesWithReExecute("/Error/Page404", "?code={0}");
-// --- HATA YÖNETÝMÝ BÝTÝÞ ---
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-app.UseAuthentication(); // Kimlik Doðrulama (Ben kimim?)
-app.UseAuthorization();  // Yetkilendirme (Nereye girebilirim?)
-
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// --- OTOMATÝK ADMÝN OLUÞTURMA (SEED USER) ---
-// Uygulama her baþladýðýnda çalýþýr, admin yoksa ekler.
+// --- 7. OTOMATÝK KURULUM MOTORU (SEED DATA) ---
 using (var scope = app.Services.CreateScope())
 {
-    var userManager = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<AssetGuard.Entity.AppUser>>();
-
-    // Admin kullanýcýsý var mý diye bak
-    var adminUser = userManager.FindByNameAsync("admin").Result;
-
-    if (adminUser == null)
+    var services = scope.ServiceProvider;
+    try
     {
-        // Yoksa oluþtur
-        adminUser = new AssetGuard.Entity.AppUser
-        {
-            UserName = "admin",
-            Email = "admin@assetguard.com",
-            FirstName = "Sistem",
-            LastName = "Yöneticisi",
-            EmailConfirmed = true
-        };
+        var context = services.GetRequiredService<ZimmetContext>();
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
 
-        // Þifreyi (123) Identity sistemiyle güvenli þekilde oluþturup kaydet
-        var result = userManager.CreateAsync(adminUser, "123").Result;
+        // Veritabaný yoksa oluþtur (Migrationlarý bas)
+        // NOT: Bu iþlem, yukarýda seçilen 'validConnectionString' adresine yapýlýr.
+        context.Database.Migrate();
 
-        if (result.Succeeded)
+        // Otomatik Admin
+        var adminUser = userManager.FindByNameAsync("admin").GetAwaiter().GetResult();
+        if (adminUser == null)
         {
-            Console.WriteLine(">>> Admin kullanýcýsý (admin/123) baþarýyla oluþturuldu.");
+            var newAdmin = new AppUser
+            {
+                UserName = "admin",
+                Email = "admin@assetguard.com",
+                FirstName = "Sistem",
+                LastName = "Yöneticisi",
+                EmailConfirmed = true
+            };
+            userManager.CreateAsync(newAdmin, "123").GetAwaiter().GetResult();
         }
+    }
+    catch (Exception ex)
+    {
+        // Eðer veritabaný baðlantýsý veya oluþturma sýrasýnda hata olursa konsola yaz
+        Console.WriteLine(">>> KRÝTÝK HATA (DB Init): " + ex.Message);
     }
 }
 

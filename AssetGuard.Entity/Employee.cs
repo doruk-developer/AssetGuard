@@ -13,4 +13,5 @@ public partial class Employee
     public virtual ICollection<Assignment> Assignments { get; set; } = new List<Assignment>();
 
     public virtual Department Department { get; set; } = null!;
+    public string Email { get; set; }
 }
