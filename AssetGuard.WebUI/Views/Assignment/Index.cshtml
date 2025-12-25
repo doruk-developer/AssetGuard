@@ -4,57 +4,104 @@
 @{
     ViewData["Title"] = "Zimmet Hareketleri";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Rol kontrolü
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <style>
+    /* DataTables Oklarını Gizle */
     table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
     table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
     table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
         display: none !important;
     }
 
-    #tblAssignments thead th {
+    /* Başlık Stilleri */
+    #tblAssignments thead th:not(.static-header) {
         cursor: pointer;
         transition: 0.2s;
         padding: 12px 8px !important;
+        text-transform: uppercase;
+        font-size: 0.85rem;
     }
 
-        #tblAssignments thead th:hover {
-            background-color: #f4f6f9;
+        #tblAssignments thead th:not(.static-header):hover {
+            background-color: #f4f6f9 !important;
             color: #007bff;
             text-decoration: underline;
         }
+
+    #tblAssignments thead th.sorting_asc, #tblAssignments thead th.sorting_desc {
+        color: #007bff;
+        border-bottom: 2px solid #007bff !important;
+    }
+
+    /* Statik Başlıklar */
+    .static-header {
+        cursor: default !important;
+        pointer-events: none;
+        color: #999 !important;
+    }
+
+    /* USER İÇİN GRİ VE PASİF BUTON STİLİ */
+    .disabled-btn {
+        pointer-events: none !important; /* Tıklamayı engeller */
+        opacity: 0.6 !important; /* Soluklaştırır */
+        cursor: not-allowed !important; /* Yasak imleci */
+        background-color: #6c757d !important; /* NET GRİ RENK */
+        border-color: #6c757d !important;
+        color: white !important;
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: 0.2rem;
+    }
 </style>
 
 <div class="card">
     <div class="card-header border-0">
         <h3 class="card-title">Zimmet Geçmişi</h3>
         <div class="card-tools">
-            <a href="/Assignment/Create" class="btn btn-primary btn-sm"><i class="fas fa-handshake"></i> Yeni Zimmet Ata</a>
+            <!-- YENİ ZİMMET BUTONU -->
+            @if (isAdmin)
+            {
+                <!-- Admin: Mavi ve Canlı -->
+                <a href="/Assignment/Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-handshake"></i> Yeni Zimmet Ata
+                </a>
+            }
+            else
+            {
+                <!-- User: GRİ ve Ölü -->
+                <span class="disabled-btn">
+                    <i class="fas fa-handshake"></i> Yeni Zimmet Ata
+                </span>
+            }
         </div>
     </div>
     <div class="card-body p-0">
-        <table id="tblAssignments" class="table table-striped projects table-hover">
+        <table id="tblAssignments" class="table table-striped projects table-hover m-0">
             <thead>
                 <tr>
-                    <th style="width: 5%">ID</th>
+                    <th style="display:none;">ID</th> <!-- Index 0 -->
                     <th style="width: 20%">Personel</th>
                     <th style="width: 25%">Demirbaş</th>
                     <th style="width: 15%">Veriliş Tarihi</th>
                     <th style="width: 15%">İade Tarihi</th>
                     <th style="width: 10%">Durum</th>
-                    <th style="width: 10%">İşlem</th>
+                    <th class="static-header text-right" style="width: 10%">İşlem</th> <!-- Index 6 -->
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.Id</td>
+                        <td style="display:none;">@item.Id</td>
                         <td>@item.Employee?.FirstName @item.Employee?.LastName</td>
                         <td>@item.Asset?.AssetName <br /> <small class="text-muted">@item.Asset?.SerialNo</small></td>
 
-                        <!-- TARİH SIRALAMASI İÇİN data-order KULLANIYORUZ -->
+                        <!-- Tarih Sıralaması (YYYYMMDD) -->
                         <td data-order="@item.AssignedDate.ToString("yyyyMMdd")">
                             @item.AssignedDate.ToString("dd.MM.yyyy")
                         </td>
@@ -75,10 +122,23 @@
                             }
                         </td>
 
-                        <td>
+                        <td class="project-actions text-right">
                             @if (item.ReturnDate == null)
                             {
-                                <a href="/Assignment/Return/@item.Id" class="btn btn-warning btn-sm"><i class="fas fa-undo"></i> İade Al</a>
+                                if (isAdmin)
+                                {
+                                    <!-- ADMIN: Sarı İade Butonu -->
+                                    <a href="/Assignment/Return/@item.Id" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-undo"></i> İade Al
+                                    </a>
+                                }
+                                else
+                                {
+                                    <!-- USER: GRİ İade Butonu -->
+                                    <span class="disabled-btn">
+                                        <i class="fas fa-undo"></i> İade Al
+                                    </span>
+                                }
                             }
                         </td>
                     </tr>
@@ -93,10 +153,16 @@
     <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function () {
+            if ($.fn.DataTable.isDataTable('#tblAssignments')) { $('#tblAssignments').DataTable().destroy(); }
+
             $("#tblAssignments").DataTable({
                 "responsive": true, "autoWidth": false,
                 "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" },
-                "order": [[3, "desc"]] // Veriliş Tarihine göre en yeniden eskiye
+                "order": [[3, "desc"]], // Veriliş Tarihine göre
+                "columnDefs": [
+                    { "targets": [0], "visible": false }, // ID Gizle
+                    { "targets": [6], "orderable": false } // İşlem sütunu sıralanmasın
+                ]
             });
         });
     </script>

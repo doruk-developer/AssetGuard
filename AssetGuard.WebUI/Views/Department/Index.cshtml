@@ -1,43 +1,62 @@
-﻿@using AssetGuard.Entity
-@model AssetGuard.WebUI.Models.DepartmentListViewModel
+﻿@model AssetGuard.WebUI.Models.DepartmentListViewModel
 
 @{
     ViewData["Title"] = "Departman Yönetimi";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <style>
-    /* 1. OK İŞARETLERİNİ KALDIR */
+    /* DataTables Oklarını Gizle */
     table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
     table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
     table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
         display: none !important;
     }
 
-    /* 2. VERİ BAŞLIKLARI: Tıklanabilir Efektler */
-    #tblDepartments thead th:not(.no-export) {
+    /* Başlıklar */
+    #tblDepartments thead th:not(.static-header) {
         cursor: pointer;
-        color: #444;
-        transition: all 0.2s ease;
-        position: relative;
+        transition: 0.2s;
+        padding: 12px 8px !important;
+        text-transform: uppercase;
+        font-size: 0.85rem;
     }
 
-        #tblDepartments thead th:not(.no-export):hover {
-            background-color: #f0f4f8 !important;
-            color: #007bff !important;
+        #tblDepartments thead th:not(.static-header):hover {
+            background-color: #f4f6f9 !important;
+            color: #007bff;
+            text-decoration: underline;
         }
 
     #tblDepartments thead th.sorting_asc, #tblDepartments thead th.sorting_desc {
-        color: #007bff !important;
+        color: #007bff;
         border-bottom: 2px solid #007bff !important;
     }
 
-    /* 3. İŞLEMLER BAŞLIĞI: Tamamen Statik (Tıklama Hissiyatı Yok) */
-    #tblDepartments thead th.no-export {
+    /* Statik Başlıklar */
+    .static-header {
         cursor: default !important;
-        pointer-events: none; /* Tıklama sinyalini tamamen keser */
-        color: #999 !important; /* Bir tık daha silik renk */
-        text-decoration: none !important;
+        pointer-events: none;
+        color: #999 !important;
+    }
+
+    /* SÖNÜK BUTON STİLİ */
+    .disabled-action-btn {
+        pointer-events: none !important;
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
+        color: white !important;
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+        text-align: center;
+        vertical-align: middle;
+        text-decoration: none;
     }
 </style>
 
@@ -45,16 +64,28 @@
     <div class="card-header border-0">
         <h3 class="card-title">Sistem Departmanları</h3>
         <div class="card-tools">
-            <a href="/Department/Create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Yeni Departman Ekle</a>
+            @if (isAdmin)
+            {
+                <a href="/Department/Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Yeni Departman Ekle
+                </a>
+            }
+            else
+            {
+                <span class="disabled-action-btn">
+                    <i class="fas fa-plus"></i> Yeni Departman Ekle
+                </span>
+            }
         </div>
     </div>
+
     <div class="card-body p-0">
         <table id="tblDepartments" class="table table-striped projects table-hover m-0">
             <thead>
                 <tr>
                     <th style="display:none;">ID</th>
-                    <th>Departman Adı</th>
-                    <th class="text-right no-export">İşlemler</th> <!-- no-export class'ı eklendi -->
+                    <th style="width: 80%">Departman Adı</th>
+                    <th class="static-header text-right" style="width: 20%">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,10 +93,20 @@
                 {
                     <tr>
                         <td style="display:none;">@item.Id</td>
-                        <td><strong>@item.Name</strong></td>
-                        <td class="text-right">
-                            <a class="btn btn-info btn-sm" href="/Department/Edit/@item.Id"><i class="fas fa-pencil-alt"></i></a>
-                            <a class="btn btn-danger btn-sm" href="/Department/Delete/@item.Id" onclick="return confirm('Silmek istediğinize emin misiniz?');"><i class="fas fa-trash"></i></a>
+                        <td>
+                            <strong>@item.Name</strong>
+                        </td>
+                        <td class="project-actions text-right">
+                            @if (isAdmin)
+                            {
+                                <a class="btn btn-info btn-sm" href="/Department/Edit/@item.Id"><i class="fas fa-pencil-alt"></i> Düzenle</a>
+                                <a class="btn btn-danger btn-sm" href="/Department/Delete/@item.Id" onclick="return confirm('Bu departmanı silmek istediğinize emin misiniz?');"><i class="fas fa-trash"></i> Sil</a>
+                            }
+                            else
+                            {
+                                <span class="disabled-action-btn"><i class="fas fa-pencil-alt"></i> Düzenle</span>
+                                <span class="disabled-action-btn"><i class="fas fa-trash"></i> Sil</span>
+                            }
                         </td>
                     </tr>
                 }
@@ -74,36 +115,37 @@
     </div>
 </div>
 
+<!-- HATA MODALI -->
 @if (Model.ErrorInfo != null)
 {
     <div class="modal fade" id="deleteErrorModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg text-dark">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content bg-danger">
                 <div class="modal-header">
                     <h4 class="modal-title"><i class="fas fa-exclamation-triangle mr-2"></i> @Model.ErrorInfo.EntityName Silinemedi!</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
-                <div class="modal-body bg-white">
+                <div class="modal-body" style="background-color: white; color: black;">
                     <p class="lead text-danger font-weight-bold">@Model.ErrorInfo.ErrorMessage</p>
-                    <table class="table table-sm table-bordered">
-                        <thead><tr><th>Departmana Bağlı Personeller</th></tr></thead>
-                        <tbody>
-                            @foreach (var item in Model.ErrorInfo.RelatedItems)
-                            {
-                                <tr><td>@item</td></tr>
-                            }
-                        </tbody>
-                    </table>
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-sm table-bordered table-striped">
+                            <thead><tr><th>Bağlı Personeller</th></tr></thead>
+                            <tbody>
+                                @foreach (var item in Model.ErrorInfo.RelatedItems)
+                                {
+                                    <tr><td><i class="fas fa-user text-muted mr-2"></i> @item</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="modal-footer bg-light"><button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button></div>
             </div>
         </div>
     </div>
 }
 
 @section Scripts {
-    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function () {
             $("#tblDepartments").DataTable({

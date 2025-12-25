@@ -1,45 +1,109 @@
-﻿@model AssetGuard.WebUI.Models.CategoryListViewModel
+﻿@using AssetGuard.Entity
+@model AssetGuard.WebUI.Models.CategoryListViewModel
 
 @{
     ViewData["Title"] = "Kategori Yönetimi";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    bool isAdmin = User.IsInRole("Admin");
 }
 
+<!-- 1. CSS KÜTÜPHANELERİ (GARANTİ YÜKLEME) -->
+<link rel="stylesheet" href="~/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="~/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+
+<style>
+    /* DataTables Oklarını Gizle */
+    table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
+    table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
+    table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
+        display: none !important;
+    }
+
+    /* Başlık Stilleri */
+    #tblCategoriesFinal thead th:not(.static-header) {
+        cursor: pointer;
+        transition: 0.2s;
+        padding: 12px 8px !important;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+
+        #tblCategoriesFinal thead th:not(.static-header):hover {
+            background-color: #f4f6f9 !important;
+            color: #007bff;
+            text-decoration: underline;
+        }
+
+    /* Statik Başlıklar */
+    .static-header {
+        cursor: default !important;
+        pointer-events: none;
+        color: #999 !important;
+    }
+
+    /* Pasif Buton Stili (User İçin) */
+    .disabled-action-btn {
+        pointer-events: none !important;
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
+        color: white !important;
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: 0.2rem;
+    }
+</style>
+
 <div class="card">
-    <div class="card-header">
+    <div class="card-header border-0">
         <h3 class="card-title">Tüm Kategoriler</h3>
         <div class="card-tools">
-            <a href="/Category/Create" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Yeni Kategori Ekle
-            </a>
+            @if (isAdmin)
+            {
+                <a href="/Category/Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Yeni Kategori Ekle
+                </a>
+            }
+            else
+            {
+                <span class="disabled-action-btn">
+                    <i class="fas fa-plus"></i> Yeni Kategori Ekle
+                </span>
+            }
         </div>
     </div>
 
     <div class="card-body p-0">
-        <table class="table table-striped projects table-hover">
+        <!-- TABLO ID: tblCategoriesFinal -->
+        <table id="tblCategoriesFinal" class="table table-striped projects table-hover m-0">
             <thead>
                 <tr>
-                    <th style="width: 10%">ID</th>
+                    <th style="display:none;">ID</th>
                     <th style="width: 70%">Kategori Adı</th>
-                    <th style="width: 20%">İşlemler</th>
+                    <th class="static-header text-right" style="width: 20%">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- ViewModel içindeki Categories listesini dönüyoruz -->
                 @foreach (var item in Model.Categories)
                 {
                     <tr>
-                        <td>@item.Id</td>
+                        <td style="display:none;">@item.Id</td>
                         <td>
-                            <a>@item.Name</a>
+                            <strong>@item.Name</strong>
                         </td>
                         <td class="project-actions text-right">
-                            <a class="btn btn-info btn-sm" href="/Category/Edit/@item.Id">
-                                <i class="fas fa-pencil-alt"></i> Düzenle
-                            </a>
-                            <a class="btn btn-danger btn-sm" href="/Category/Delete/@item.Id" onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?');">
-                                <i class="fas fa-trash"></i> Sil
-                            </a>
+                            @if (isAdmin)
+                            {
+                                <a class="btn btn-info btn-sm" href="/Category/Edit/@item.Id"><i class="fas fa-pencil-alt"></i> Düzenle</a>
+                                <a class="btn btn-danger btn-sm" href="/Category/Delete/@item.Id" onclick="return confirm('Silmek istediğinize emin misiniz?');"><i class="fas fa-trash"></i> Sil</a>
+                            }
+                            else
+                            {
+                                <span class="disabled-action-btn"><i class="fas fa-pencil-alt"></i> Düzenle</span>
+                                <span class="disabled-action-btn"><i class="fas fa-trash"></i> Sil</span>
+                            }
                         </td>
                     </tr>
                 }
@@ -48,66 +112,65 @@
     </div>
 </div>
 
-<!-- ================================================= -->
 <!-- HATA MODALI (Sadece ErrorInfo doluysa oluşur) -->
-<!-- ================================================= -->
 @if (Model.ErrorInfo != null)
 {
     <div class="modal fade" id="deleteErrorModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content bg-danger">
-
                 <div class="modal-header">
-                    <h4 class="modal-title">
-                        <i class="fas fa-exclamation-triangle mr-2"></i> @Model.ErrorInfo.EntityName Silinemedi!
-                    </h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h4 class="modal-title"><i class="fas fa-exclamation-triangle mr-2"></i> @Model.ErrorInfo.EntityName Silinemedi!</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
-
                 <div class="modal-body" style="background-color: white; color: black;">
                     <p class="lead text-danger font-weight-bold">@Model.ErrorInfo.ErrorMessage</p>
-                    <p>Silme işlemini yapabilmek için önce aşağıdaki ürünlerin kategorisini değiştirmeli veya silmelisiniz:</p>
-
                     <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
                         <table class="table table-sm table-bordered table-striped">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Engelleyen Kayıtlar</th>
-                                </tr>
-                            </thead>
+                            <thead><tr><th>Engelleyen Kayıtlar</th></tr></thead>
                             <tbody>
                                 @foreach (var item in Model.ErrorInfo.RelatedItems)
                                 {
-                                    <tr>
-                                        <td><i class="fas fa-link text-muted mr-2"></i> @item</td>
-                                    </tr>
+                                    <tr><td><i class="fas fa-link text-muted mr-2"></i> @item</td></tr>
                                 }
                             </tbody>
                         </table>
                     </div>
                 </div>
-
-                <div class="modal-footer justify-content-between" style="background-color: #f8f9fa; color: black;">
-                    <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Kapat</button>
-                    <!-- Modal kapandığında kullanıcıyı temiz bir Index sayfasına yönlendir -->
-                    <a href="/Category/Index" class="btn btn-danger">Tamam</a>
-                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button></div>
             </div>
         </div>
     </div>
 }
 
 @section Scripts {
+    <!-- 2. JAVASCRIPT KÜTÜPHANELERİ (GARANTİ YÜKLEME) -->
+    <script src="~/plugins/jquery/jquery.min.js"></script>
+    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+
     <script>
         $(document).ready(function () {
-            // Eğer ErrorInfo doluysa Modalı otomatik aç
+            // Önceki tanımları temizle
+            if ($.fn.DataTable.isDataTable('#tblCategoriesFinal')) {
+                $('#tblCategoriesFinal').DataTable().destroy();
+            }
+
+            $("#tblCategoriesFinal").DataTable({
+                "responsive": true,
+                "lengthChange": true,
+                "autoWidth": false,
+                "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" },
+                "order": [[1, "asc"]], // İsim (A-Z)
+                "columnDefs": [
+                    { "targets": [0], "visible": false }, // ID Gizle
+                    { "targets": [2], "orderable": false, "searchable": false } // İşlemleri Kapat
+                ]
+            });
+
+            // Hata varsa Modalı Aç
             @if (Model.ErrorInfo != null)
             {
-                    <text>
-                        $('#deleteErrorModal').modal('show');
-                    </text>
+                <text>$('#deleteErrorModal').modal('show');</text>
             }
         });
     </script>

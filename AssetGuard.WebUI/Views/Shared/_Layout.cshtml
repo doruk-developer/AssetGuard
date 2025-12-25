@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AssetGuard | Demirbaş Yönetim Sistemi</title>
+    <title>AssetGuard | @ViewData["Title"]</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -15,105 +15,55 @@
     <link rel="stylesheet" href="~/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
     <!-- iCheck -->
     <link rel="stylesheet" href="~/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
-    <!-- overlayScrollbars -->
-    <link rel="stylesheet" href="~/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
-    <!-- Daterange picker -->
-    <link rel="stylesheet" href="~/plugins/toastr/toastr.css" />
+
     <!-- DataTables -->
     <link rel="stylesheet" href="~/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="~/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
 
-    <!-- Google Font (poppins) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Toastr (Bildirimler) -->
+    <link rel="stylesheet" href="~/plugins/toastr/toastr.min.css" />
 
-    <!-- Stillendirme (Modern Görünüm & Offline Font) -->
-    <style>
-        /* A) YEREL SİSTEM FONTLARI (Google Fonts yerine) */
-        body {
-            font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
-        }
-
-        /* B) SIDEBAR MODERNLEŞTİRME (Sadece Şekil, Renk Yok!) */
-        .nav-sidebar .nav-link {
-            border-radius: 8px; /* Hafif yuvarlak köşe */
-            margin-bottom: 4px; /* Linkler arası boşluk */
-            transition: all 0.2s; /* Yumuşak geçiş */
-        }
-
-        /* C) AKTİF MENÜ (Renk zorlaması KALDIRILDI) */
-        .nav-sidebar .nav-item > .nav-link.active {
-            font-weight: 600; /* Aktif olan kalın olsun */
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* Hafif gölge */
-            /* Background rengini sildik, ayarlar sayfasından gelen renk işleyecek */
-        }
-
-        /* D) LOGO ALANI */
-        .brand-link {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        /* E) GENEL KARTLAR */
-        .card {
-            border-radius: 8px;
-            border: none;
-            box-shadow: 0 0 15px rgba(0,0,0,0.05);
-        }
-
-        /* F) LOGO RENGİ ZORLAMA (AdminLTE varsayılanını ezmek için) */
-        ..bg-primary {
-            background-color: #007bff !important;
-        }
-
-        .bg-danger {
-            background-color: #dc3545 !important;
-        }
-
-        .bg-success {
-            background-color: #28a745 !important;
-        }
-
-        .bg-warning {
-            background-color: #ffc107 !important;
-            color: #1f2d3d !important;
-        }
-
-        .bg-info {
-            background-color: #17a2b8 !important;
-        }
-
-        .bg-dark {
-            background-color: #343a40 !important;
-        }
-    </style>
-
-
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
+    <!-- overlayScrollbars -->
+    <link rel="stylesheet" href="~/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
 </head>
+
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
 
-        <!-- 1. ÜST MENÜ (NAVBAR) -->
-        <partial name="_Navbar" />
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="/" class="nav-link">Ana Sayfa</a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.navbar -->
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Sidebar Partial Çağrısı -->
+            <partial name="_Sidebar" />
+        </aside>
 
-        <!-- 2. SOL MENÜ (SIDEBAR) -->
-        <partial name="_Sidebar" />
-
-        <!-- 3. DEĞİŞEN İÇERİK ALANI (CONTENT WRAPPER) -->
+        <!-- Content Wrapper -->
         <div class="content-wrapper">
-            <!-- Sayfa Başlığı (Breadcrumb) -->
+            <!-- Content Header -->
             <div class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <!-- Her sayfa buraya kendi başlığını gönderecek -->
                             <h1 class="m-0">@ViewData["Title"]</h1>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- /.content-header -->
-            <!-- Ana İçerik -->
+
+            <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
                     @RenderBody()
@@ -121,37 +71,41 @@
             </section>
         </div>
 
-        <!-- 4. ALT BİLGİ (FOOTER) -->
+        <!-- Footer -->
         <footer class="main-footer">
             <strong>Copyright &copy; @DateTime.Now.Year <a href="#">AssetGuard</a>.</strong>
             Tüm hakları saklıdır.
             <div class="float-right d-none d-sm-inline-block">
-                <b>Version</b> 1.0.0 (Alpha)
+                <b>Version</b> 1.0.0
             </div>
         </footer>
 
-        <!-- Control Sidebar -->
         <aside class="control-sidebar control-sidebar-dark">
             <!-- Control sidebar content goes here -->
         </aside>
     </div>
-    <!-- ./wrapper -->
+
+    <!-- SCRIPTS -->
     <!-- jQuery -->
     <script src="~/plugins/jquery/jquery.min.js"></script>
     <!-- jQuery UI 1.11.4 -->
     <script src="~/plugins/jquery-ui/jquery-ui.min.js"></script>
-    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
     <script>
         $.widget.bridge('uibutton', $.ui.button)
     </script>
     <!-- Bootstrap 4 -->
     <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- DataTables & Plugins -->
+    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+
     <!-- ChartJS -->
     <script src="~/plugins/chart.js/Chart.min.js"></script>
     <!-- Sparkline -->
     <script src="~/plugins/sparklines/sparkline.js"></script>
-    <!-- jQuery Knob Chart -->
-    <script src="~/plugins/jquery-knob/jquery.knob.min.js"></script>
     <!-- daterangepicker -->
     <script src="~/plugins/moment/moment.min.js"></script>
     <script src="~/plugins/daterangepicker/daterangepicker.js"></script>
@@ -164,117 +118,36 @@
     <!-- AdminLTE App -->
     <script src="~/dist/js/adminlte.js"></script>
 
-    <!-- Sayfaya özel scriptler buraya gelecek -->
-    @await RenderSectionAsync("Scripts", required: false)
-
-
-    <script>
-        $(document).ready(function () {
-            // Ayarları Oku
-            var savedColor = localStorage.getItem('assetGuard_sidebarColor');
-            var savedDarkMode = localStorage.getItem('assetGuard_darkMode');
-
-            // Elementleri Seç
-            var sidebar = $('.main-sidebar');
-            var brandLink = $('.brand-link');
-            var body = $('body');
-            var header = $('.main-header');
-
-            // 1. DARK MODE
-            if (savedDarkMode === 'true') {
-                body.addClass('dark-mode');
-                header.removeClass('navbar-white navbar-light').addClass('navbar-dark');
-            }
-
-            // 2. RENK AYARI (Stil Bazlı - Kesin Çözüm)
-            if (savedColor && savedColor !== 'default') {
-                // Renk Kodları Sözlüğü (Map)
-                var colorMap = {
-                    'primary': '#007bff',
-                    'secondary': '#6c757d',
-                    'success': '#28a745',
-                    'danger': '#dc3545',
-                    'warning': '#ffc107',
-                    'info': '#17a2b8',
-                    'dark': '#343a40',
-                    'indigo': '#6610f2',
-                    'navy': '#001f3f',
-                    'purple': '#6f42c1',
-                    'teal': '#20c997',
-                    'white': '#ffffff'
-                };
-
-                var hexColor = colorMap[savedColor];
-
-                if (hexColor) {
-                    // CSS Class ile uğraşma, direkt rengi bas!
-                    sidebar.attr('style', 'background-color: ' + hexColor + ' !important');
-                    brandLink.attr('style', 'background-color: ' + hexColor + ' !important');
-
-                    // Eğer açık renkse (White, Warning) metin rengini siyah yap
-                    if(savedColor === 'white' || savedColor === 'warning' || savedColor === 'light') {
-                         sidebar.addClass('sidebar-light-primary').removeClass('sidebar-dark-primary');
-                    }
-                }
-            } else {
-                // Varsayılan ise stili temizle
-                sidebar.removeAttr('style');
-                brandLink.removeAttr('style');
-            }
-        });
-    </script>
-
-    <!-- DataTables  & Plugins -->
-    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="~/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="~/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-
-    <!-- Mevcut Toastr JS dosyasını çağırıyoruz -->
+    <!-- Toastr (Bildirimler) -->
     <script src="~/plugins/toastr/toastr.min.js"></script>
 
+    <!-- Global Scripts & Toastr Logic -->
     <script>
         $(document).ready(function () {
-            // Toastr Konfigürasyonu
+            // Toastr Ayarları
             toastr.options = {
-                "closeButton": true,         // Kapatma butonu
-                "progressBar": true,         // Altta dolan çizgi
-                "positionClass": "toast-top-right", // Sağ üstte çıksın
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
                 "showDuration": "300",
                 "hideDuration": "1000",
-                "timeOut": "4000",           // 4 saniye sonra kapansın
-                "extendedTimeOut": "1000",
-                "showEasing": "swing",
-                "hideEasing": "linear",
-                "showMethod": "fadeIn",
-                "hideMethod": "fadeOut"
+                "timeOut": "5000",
+                "extendedTimeOut": "1000"
             };
 
-            // Controller'dan gelen mesajları kontrol et ve patlat
-            var successMessage = '@TempData["Success"]';
-            if (successMessage) {
-                toastr.success(successMessage, "Başarılı");
-            }
+            // Backend'den gelen mesajları yakala
+            var successMsg = '@TempData["Success"]';
+            var errorMsg = '@TempData["Error"]';
+            var warningMsg = '@TempData["Warning"]';
+            var infoMsg = '@TempData["Info"]';
 
-            var errorMessage = '@TempData["Error"]';
-            if (errorMessage) {
-                toastr.error(errorMessage, "Hata!");
-            }
-
-            var warningMessage = '@TempData["Warning"]';
-            if (warningMessage) {
-                toastr.warning(warningMessage, "Dikkat");
-            }
-
-            var infoMessage = '@TempData["Info"]';
-            if (infoMessage) {
-                toastr.info(infoMessage, "Bilgi");
-            }
+            if (successMsg) { toastr.success(successMsg, "Başarılı"); }
+            if (errorMsg) { toastr.error(errorMsg, "Hata"); }
+            if (warningMsg) { toastr.warning(warningMsg, "Dikkat"); }
+            if (infoMsg) { toastr.info(infoMsg, "Bilgi"); }
         });
     </script>
 
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
-
-
-
 </html>

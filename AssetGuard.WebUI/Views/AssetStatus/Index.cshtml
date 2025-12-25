@@ -3,44 +3,103 @@
 
 @{
     ViewData["Title"] = "Demirbaş Durumları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool isAdmin = User.IsInRole("Admin");
 }
 
+<!-- 1. CSSLERİ DOĞRUDAN BURAYA EKLİYORUZ (Garanti Olsun) -->
+<link rel="stylesheet" href="~/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="~/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+
+<style>
+    /* DataTables Oklarını Gizle */
+    table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
+    table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
+    table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
+        display: none !important;
+    }
+
+    /* Başlıklar */
+    #tblAssetStatusFinal thead th:not(.static-header) {
+        cursor: pointer;
+        transition: 0.2s;
+        padding: 12px 8px !important;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+
+        #tblAssetStatusFinal thead th:not(.static-header):hover {
+            background-color: #f4f6f9 !important;
+            color: #007bff;
+            text-decoration: underline;
+        }
+
+    /* Statik Başlıklar */
+    .static-header {
+        cursor: default !important;
+        pointer-events: none;
+        color: #999 !important;
+    }
+
+    /* Pasif Buton */
+    .disabled-action-btn {
+        pointer-events: none !important;
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
+        color: white !important;
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: 0.2rem;
+    }
+</style>
+
 <div class="card">
-    <div class="card-header">
+    <div class="card-header border-0">
         <h3 class="card-title">Tanımlı Durumlar</h3>
         <div class="card-tools">
-            <a href="/AssetStatus/Create" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Yeni Durum Ekle
-            </a>
+            @if (isAdmin)
+            {
+                <a href="/AssetStatus/Create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Yeni Durum Ekle</a>
+            }
+            else
+            {
+                <span class="disabled-action-btn"><i class="fas fa-plus"></i> Yeni Durum Ekle</span>
+            }
         </div>
     </div>
 
     <div class="card-body p-0">
-        <table class="table table-striped projects table-hover">
+        <!-- ID'yi DEĞİŞTİRDİK: tblAssetStatusFinal -->
+        <table id="tblAssetStatusFinal" class="table table-striped projects table-hover m-0">
             <thead>
                 <tr>
-                    <th style="width: 10%">ID</th>
+                    <th style="display:none;">ID</th>
                     <th style="width: 70%">Durum Adı</th>
-                    <th style="width: 20%">İşlemler</th>
+                    <th class="static-header text-right" style="width: 20%">İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.Id</td>
+                        <td style="display:none;">@item.Id</td>
                         <td>
-                            <!-- DÜZELTİLEN KISIM BURASI -->
-                            <!-- Veritabanından gelen rengi kullanır, yoksa 'secondary' (gri) yapar -->
-                            <span class="badge badge-@(item.ColorClass ?? "secondary")">@item.Name</span>
+                            <span class="badge badge-@item.ColorClass" style="font-size: 0.9rem;">@item.Name</span>
                         </td>
                         <td class="project-actions text-right">
-                            <a class="btn btn-info btn-sm" href="/AssetStatus/Edit/@item.Id">
-                                <i class="fas fa-pencil-alt"></i> Düzenle
-                            </a>
-                            <a class="btn btn-danger btn-sm" href="/AssetStatus/Delete/@item.Id" onclick="return confirm('Bu durumu silmek istediğinize emin misiniz?');">
-                                <i class="fas fa-trash"></i> Sil
-                            </a>
+                            @if (isAdmin)
+                            {
+                                <a class="btn btn-info btn-sm" href="/AssetStatus/Edit/@item.Id"><i class="fas fa-pencil-alt"></i> Düzenle</a>
+                                <a class="btn btn-danger btn-sm" href="/AssetStatus/Delete/@item.Id" onclick="return confirm('Silmek istediğinize emin misiniz?');"><i class="fas fa-trash"></i> Sil</a>
+                            }
+                            else
+                            {
+                                <span class="disabled-action-btn"><i class="fas fa-pencil-alt"></i> Düzenle</span>
+                                <span class="disabled-action-btn"><i class="fas fa-trash"></i> Sil</span>
+                            }
                         </td>
                     </tr>
                 }
@@ -48,3 +107,33 @@
         </table>
     </div>
 </div>
+
+@section Scripts {
+    <!-- 2. JAVASCRIPT KÜTÜPHANELERİNİ MANUEL EKLİYORUZ -->
+    <script src="~/plugins/jquery/jquery.min.js"></script>
+    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            console.log("AssetStatus Tablosu Başlatılıyor..."); // Konsoldan takip et
+
+            // Önceki varsa sil
+            if ($.fn.DataTable.isDataTable('#tblAssetStatusFinal')) {
+                $('#tblAssetStatusFinal').DataTable().destroy();
+            }
+
+            $("#tblAssetStatusFinal").DataTable({
+                "responsive": true,
+                "lengthChange": true,
+                "autoWidth": false,
+                "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" },
+                "order": [[1, "asc"]],
+                "columnDefs": [
+                    { "targets": [0], "visible": false },
+                    { "targets": [2], "orderable": false, "searchable": false }
+                ]
+            });
+        });
+    </script>
+}

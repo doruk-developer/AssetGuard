@@ -1,234 +1,50 @@
-﻿@model AssetGuard.WebUI.Models.ChangePasswordViewModel
+﻿@model AssetGuard.WebUI.Models.ThemeViewModel
 @{
-    ViewData["Title"] = "Sistem ve Panel Ayarları";
+    ViewData["Title"] = "Görünüm Ayarları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="row">
-    <div class="col-md-12">
-        <!-- Başarı veya Hata Mesajları -->
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                <h5><i class="icon fas fa-check"></i> Başarılı!</h5>
-                @TempData["SuccessMessage"]
+    <div class="col-md-6">
+        <!-- Ayar Kartı -->
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-paint-brush mr-2"></i> Tema ve Renk Tercihleri</h3>
             </div>
-        }
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                <h5><i class="icon fas fa-ban"></i> Hata!</h5>
-                @TempData["ErrorMessage"]
-            </div>
-        }
 
-        <div class="card card-primary card-outline card-tabs">
-            <div class="card-header p-0 pt-1 border-bottom-0">
-                <ul class="nav nav-tabs" id="settingsTab" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" id="view-tab" data-toggle="pill" href="#tab-view" role="tab">Görünüm Ayarları</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="dashboard-tab" data-toggle="pill" href="#tab-dashboard" role="tab">Dashboard Tercihleri</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="security-tab" data-toggle="pill" href="#tab-security" role="tab">Profil & Güvenlik</a>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-body">
-                <div class="tab-content" id="settingsTabContent">
-
-                    <!-- 1. SEKME: GÖRÜNÜM -->
-                    <div class="tab-pane fade show active" id="tab-view" role="tabpanel">
-                        <div class="form-group">
-                            <label>Sidebar Vurgu Rengi</label>
-                            <select class="form-control col-md-4" id="sidebarColorSelector">
-                                <option value="default">Varsayılan (Koyu Gri)</option>
-                                <option value="primary">Mavi</option>
-                                <option value="warning">Sarı</option>
-                                <option value="danger">Kırmızı</option>
-                                <option value="success">Yeşil</option>
-                                <option value="indigo">İndigo</option>
-                                <option value="navy">Navy</option>
-                                <option value="purple">Mor</option>
-                                <option value="teal">Turkuaz</option>
-                                <option value="white">Beyaz (Light)</option>
-                            </select>
-                        </div>
-                        <hr />
-                        <div class="form-group">
-                            <label>Tema Modu</label>
-                            <div class="custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="darkModeSwitch">
-                                <label class="custom-control-label" for="darkModeSwitch">Gece Modu (Dark Mode)</label>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-success" onclick="saveSettings()">Görünüm Ayarlarını Kaydet</button>
+            <form asp-action="SaveTheme" method="post">
+                <div class="card-body">
+                    
+                    <!-- 1. Menü Rengi Seçimi -->
+                    <div class="form-group">
+                        <label>Sol Menü Vurgu Rengi</label>
+                        <select asp-for="SidebarColor" class="form-control">
+                            <option value="primary">Mavi (Varsayılan)</option>
+                            <option value="success">Yeşil</option>
+                            <option value="warning">Sarı</option>
+                            <option value="danger">Kırmızı</option>
+                            <option value="info">Açık Mavi</option>
+                            <option value="indigo">İndigo (Mor)</option>
+                            <option value="gray-dark">Koyu Gri</option>
+                            <option value="pink">Pembe</option>
+                        </select>
                     </div>
 
-                    <!-- 2. SEKME: DASHBOARD -->
-                    <div class="tab-pane fade" id="tab-dashboard" role="tabpanel">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5>Grafik Tercihleri</h5>
-                                <div class="form-group">
-                                    <div class="custom-control custom-radio">
-                                        <input class="custom-control-input" type="radio" id="chart1" name="chartPref" value="doughnut" checked>
-                                        <label for="chart1" class="custom-control-label">Daire (Donut) Chart</label>
-                                    </div>
-                                    <div class="custom-control custom-radio">
-                                        <input class="custom-control-input" type="radio" id="chart2" name="chartPref" value="bar">
-                                        <label for="chart2" class="custom-control-label">Çubuk (Bar) Chart</label>
-                                    </div>
-                                </div>
-                                <button type="button" class="btn btn-success" onclick="saveSettings()">Dashboard Tercihlerini Kaydet</button>
-                            </div>
+                    <!-- 2. Dark Mode Anahtarı -->
+                    <div class="form-group mt-4">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" asp-for="IsDarkMode" id="darkModeSwitch">
+                            <label class="custom-control-label" for="darkModeSwitch">Gece Modu (Dark Mode)</label>
                         </div>
                     </div>
-
-                    <!-- 3. SEKME: PROFİL & GÜVENLİK (ARTIK CANLI) -->
-                    <div class="tab-pane fade" id="tab-security" role="tabpanel">
-                        <div class="row pt-2">
-                            <div class="col-md-6">
-                                <h5 class="mb-3 text-primary"><i class="fas fa-key mr-2"></i> Şifre Güncelleme</h5>
-                                <form asp-action="ChangePassword" method="post">
-                                    <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
-
-                                    <div class="form-group">
-                                        <label asp-for="CurrentPassword">Mevcut Şifre</label>
-                                        <input asp-for="CurrentPassword" type="password" class="form-control" placeholder="******" required />
-                                        <span asp-validation-for="CurrentPassword" class="text-danger small"></span>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label asp-for="NewPassword">Yeni Şifre</label>
-                                        <input asp-for="NewPassword" type="password" class="form-control" required />
-                                        <span asp-validation-for="NewPassword" class="text-danger small"></span>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label asp-for="ConfirmPassword">Yeni Şifre Tekrar</label>
-                                        <input asp-for="ConfirmPassword" type="password" class="form-control" required />
-                                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-primary">Şifreyi Değiştir</button>
-                                </form>
-                            </div>
-                            <div class="col-md-6 border-left">
-                                <h5 class="mb-3 text-secondary"><i class="fas fa-id-card mr-2"></i> Hesap Bilgileri</h5>
-                                <div class="callout callout-info">
-                                    <p>Kullanıcı Adı: <strong>@User.Identity.Name</strong></p>
-                                    <p>Rol: <span class="badge badge-primary">Sistem Yöneticisi</span></p>
-                                    <hr />
-                                    <small class="text-muted">Profil fotoğrafı ve e-posta güncelleme özellikleri bir sonraki sürümde aktif edilecektir.</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
-            </div>
+
+                <div class="card-footer text-right">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-1"></i> Ayarları Kaydet
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        var colorMap = {
-            'primary': '#007bff',
-            'secondary': '#6c757d',
-            'success': '#28a745',
-            'danger': '#dc3545',
-            'warning': '#ffc107',
-            'info': '#17a2b8',
-            'dark': '#343a40',
-            'indigo': '#6610f2',
-            'navy': '#001f3f',
-            'purple': '#6f42c1',
-            'teal': '#20c997',
-            'white': '#ffffff'
-        };
-
-        $(document).ready(function () {
-            loadSettings();
-
-            // Renk Seçimi Değişince
-            $('#sidebarColorSelector').change(function () {
-                changeSidebarStyle($(this).val());
-            });
-
-            // Dark Mode Değişince
-            $('#darkModeSwitch').change(function () {
-                var isDarkMode = $(this).is(':checked');
-                applyDarkMode(isDarkMode);
-            });
-        });
-
-        function applyDarkMode(isDarkMode) {
-            var body = $('body');
-            var header = $('.main-header');
-            if (isDarkMode) {
-                body.addClass('dark-mode');
-                header.removeClass('navbar-white navbar-light').addClass('navbar-dark');
-            } else {
-                body.removeClass('dark-mode');
-                header.removeClass('navbar-dark').addClass('navbar-white navbar-light');
-            }
-        }
-
-        function changeSidebarStyle(colorKey) {
-            var sidebar = $('.main-sidebar');
-            var brandLink = $('.brand-link');
-
-            if (colorKey && colorKey !== 'default') {
-                var hexColor = colorMap[colorKey];
-                if (hexColor) {
-                    sidebar.attr('style', 'background-color: ' + hexColor + ' !important');
-                    brandLink.attr('style', 'background-color: ' + hexColor + ' !important');
-                    if (['white', 'warning', 'teal'].includes(colorKey)) {
-                         sidebar.addClass('sidebar-light-primary').removeClass('sidebar-dark-primary');
-                    } else {
-                         sidebar.addClass('sidebar-dark-primary').removeClass('sidebar-light-primary');
-                    }
-                }
-            } else {
-                sidebar.removeAttr('style');
-                brandLink.removeAttr('style');
-                sidebar.addClass('sidebar-dark-primary').removeClass('sidebar-light-primary');
-            }
-        }
-
-        function saveSettings() {
-            var selectedColor = $('#sidebarColorSelector').val();
-            var isDarkMode = $('#darkModeSwitch').is(':checked');
-            var selectedChartType = $('input[name="chartPref"]:checked').val();
-
-            localStorage.setItem('assetGuard_sidebarColor', selectedColor);
-            localStorage.setItem('assetGuard_darkMode', isDarkMode);
-            localStorage.setItem('assetGuard_chartType', selectedChartType);
-
-            alert('Panel tercihleri başarıyla tarayıcıya kaydedildi!');
-        }
-
-        function loadSettings() {
-            var savedColor = localStorage.getItem('assetGuard_sidebarColor');
-            var savedDarkMode = localStorage.getItem('assetGuard_darkMode');
-            var savedChartType = localStorage.getItem('assetGuard_chartType');
-
-            if (savedColor) {
-                $('#sidebarColorSelector').val(savedColor);
-                changeSidebarStyle(savedColor);
-            }
-            if (savedDarkMode === 'true') {
-                $('#darkModeSwitch').prop('checked', true);
-                applyDarkMode(true);
-            }
-            if (savedChartType) {
-                $('input[name="chartPref"][value="' + savedChartType + '"]').prop('checked', true);
-            }
-        }
-    </script>
-}

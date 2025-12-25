@@ -17,4 +17,5 @@ public class AppUser : IdentityUser
     /// Kullanıcının gerçek soyadı.
     /// </summary>
     public string LastName { get; set; } = null!;
+
 }

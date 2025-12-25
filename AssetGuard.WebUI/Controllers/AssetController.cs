@@ -11,6 +11,7 @@ using AssetGuard.WebUI.Models;
 using ClosedXML.Excel; // Excel çıktısı alabilmek için
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssetGuard.WebUI.Controllers
@@ -43,6 +44,7 @@ namespace AssetGuard.WebUI.Controllers
             return View(values);
         }
 
+        [Authorize(Roles = "Admin")]
         // 2. YENİ KAYIT (GET)
         [HttpGet]
         public IActionResult Create()
@@ -55,6 +57,7 @@ namespace AssetGuard.WebUI.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Admin")]
         // 3. YENİ KAYIT (POST)
         [HttpPost]
         public async Task<IActionResult> Create(AssetAddViewModel model)
@@ -97,6 +100,7 @@ namespace AssetGuard.WebUI.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "Admin")]
         // 4. DÜZENLEME (GET)
         [HttpGet]
         public IActionResult Edit(int id)
@@ -124,6 +128,7 @@ namespace AssetGuard.WebUI.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Admin")]
         // 5. DÜZENLEME (POST)
         [HttpPost]
         public async Task<IActionResult> Edit(AssetAddViewModel model)

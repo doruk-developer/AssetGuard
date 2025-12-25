@@ -47,12 +47,15 @@
                                 <p>Tüm Demirbaşlar</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="/Asset/Create" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Yeni Giriş Yap</p>
-                            </a>
-                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a href="/Asset/Create" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Yeni Giriş Yap</p>
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </li>
 
@@ -60,24 +63,27 @@
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-handshake"></i>
-                        <p>
-                            Zimmet Hareketleri
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
+                        <p>Zimmet Hareketleri <i class="right fas fa-angle-left"></i></p>
                     </a>
                     <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="/Assignment/Create" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Zimmet Ata</p>
-                            </a>
-                        </li>
+                        <!-- LİSTELEME: Herkes Görür -->
                         <li class="nav-item">
                             <a href="/Assignment/Index" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Hareket Geçmişi</p>
+                                <p>Zimmet Geçmişi</p>
                             </a>
                         </li>
+
+                        <!-- ZİMMET ATA: SADECE ADMIN GÖRÜR -->
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a href="/Assignment/Create" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Zimmet Ata</p>
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </li>
 
@@ -91,18 +97,24 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        <!-- LİSTELEME: Herkes Görür -->
                         <li class="nav-item">
                             <a href="/Employee/Index" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Personel Listesi</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="/Employee/Create" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Yeni Personel</p>
-                            </a>
-                        </li>
+
+                        <!-- YENİ EKLEME: Sadece Admin Görür -->
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a href="/Employee/Create" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Yeni Personel</p>
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </li>
 

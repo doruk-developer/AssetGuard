@@ -159,4 +159,90 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.Run();
+// --- 8. OTOMATÝK KURULUM VE ROL/KULLANICI MOTORU (SEED DATA) ---
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ZimmetContext>();
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>(); // Rol Yöneticisi
+
+        // A) Veritabaný yoksa oluþtur (Migration)
+        //context.Database.Migrate();
+
+        // B) ROLLERÝ OLUÞTUR (Yoksa Ekle)
+        if (!await roleManager.RoleExistsAsync("Admin"))
+            await roleManager.CreateAsync(new IdentityRole("Admin"));
+
+        if (!await roleManager.RoleExistsAsync("User"))
+            await roleManager.CreateAsync(new IdentityRole("User"));
+
+        // C) 1. KULLANICI: ADMIN (Tam Yetki) -> Þifre: 123
+        var adminUser = await userManager.FindByNameAsync("admin");
+        if (adminUser == null)
+        {
+            adminUser = new AppUser
+            {
+                UserName = "admin",
+                Email = "admin@assetguard.com",
+                FirstName = "Sistem",
+                LastName = "Yöneticisi",
+                EmailConfirmed = true
+            };
+            var result = await userManager.CreateAsync(adminUser, "123");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin"); // Rütbeyi tak
+            }
+        }
+        else
+        {
+            // Eðer kullanýcý zaten varsa ama rolü yoksa, rolü ekle (Eski veriyi düzeltmek için)
+            if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+        }
+
+        // D) 2. KULLANICI: USER (Kýsýtlý Yetki) -> Þifre: 321
+        var normalUser = await userManager.FindByNameAsync("user");
+        if (normalUser == null)
+        {
+            normalUser = new AppUser
+            {
+                UserName = "user",
+                Email = "user@assetguard.com",
+                FirstName = "Personel",
+                LastName = "Kullanýcýsý",
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(normalUser, "321");
+
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(normalUser, "User");
+                Console.WriteLine(">>> User kullanýcýsý BAÞARIYLA oluþturuldu.");
+            }
+            else
+            {
+                // HATA VARSA YAZDIR (Dedektör)
+                Console.WriteLine("!!! USER OLUÞTURULAMADI. SEBEPLER:");
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine($"- {error.Code}: {error.Description}");
+                }
+            }
+        }
+    }
+
+
+    catch (Exception ex)
+    {
+        // Eðer veritabaný baðlantýsý veya oluþturma sýrasýnda hata olursa konsola yaz
+        Console.WriteLine(">>> KRÝTÝK HATA (SEED DATA): " + ex.Message);
+    }
+    app.Run();
+}

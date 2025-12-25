@@ -4,50 +4,60 @@
 @{
     ViewData["Title"] = "Demirbaş Listesi";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    bool isAdmin = User.IsInRole("Admin");
 }
 
 <style>
-    /* 1. DataTables Oklarını Gizle */
+    /* DataTables Oklarını Gizle */
     table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
     table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
     table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
         display: none !important;
     }
 
-    /* 2. Veri Başlıkları (Tıklanabilir Olanlar) */
-    /* .static-header OLMAYAN tüm başlıklar */
+    /* Başlıklar */
     #assetTable thead th:not(.static-header) {
         cursor: pointer;
-        position: relative;
-        transition: background-color 0.2s;
+        transition: 0.2s;
         padding: 12px 8px !important;
-        vertical-align: middle;
         text-transform: uppercase;
         font-size: 0.85rem;
-        letter-spacing: 0.5px;
     }
 
-        /* Hover Efekti (Sadece tıklanabilirler için) */
         #assetTable thead th:not(.static-header):hover {
             background-color: #f4f6f9 !important;
             color: #007bff;
             text-decoration: underline;
         }
 
-    /* Aktif Sıralama Rengi */
-    #assetTable thead th.sorting_asc,
-    #assetTable thead th.sorting_desc {
+    #assetTable thead th.sorting_asc, #assetTable thead th.sorting_desc {
         color: #007bff;
         border-bottom: 2px solid #007bff !important;
     }
 
-    /* 3. Statik Başlıklar (Görsel ve İşlemler - KİLİTLİ) */
-    #assetTable thead th.static-header {
+    /* Statik Başlıklar */
+    .static-header {
         cursor: default !important;
-        pointer-events: none; /* Tıklama sinyalini keser */
-        color: #999 !important; /* Silik renk */
-        text-decoration: none !important;
-        text-align: center; /* Ortala */
+        pointer-events: none;
+        color: #999 !important;
+    }
+
+    /* SÖNÜK BUTON STİLİ (User İçin) */
+    .disabled-action-btn {
+        pointer-events: none !important; /* Tıklamayı engeller */
+        opacity: 0.5 !important; /* Soluklaştırır */
+        cursor: not-allowed !important; /* Yasak imleci */
+        background-color: #6c757d !important; /* Gri Renk */
+        border-color: #6c757d !important;
+        color: white !important;
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        border-radius: 0.2rem;
+        text-align: center;
+        vertical-align: middle;
+        text-decoration: none;
     }
 </style>
 
@@ -58,9 +68,21 @@
             <a href="/Asset/ExportExcel" class="btn btn-success btn-sm mr-2">
                 <i class="fas fa-file-excel mr-1"></i> Excel'e Aktar
             </a>
-            <a href="/Asset/Create" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Yeni Giriş
-            </a>
+
+            <!-- ÜST BUTON AYRIMI -->
+            @if (isAdmin)
+            {
+                <a href="/Asset/Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Yeni Giriş
+                </a>
+            }
+            else
+            {
+                <!-- User için sönük buton -->
+                <span class="disabled-action-btn">
+                    <i class="fas fa-plus"></i> Yeni Giriş
+                </span>
+            }
         </div>
     </div>
 
@@ -68,17 +90,13 @@
         <table id="assetTable" class="table table-striped projects table-hover m-0">
             <thead>
                 <tr>
-                    <th style="display:none;">ID</th> <!-- Index 0: Gizli -->
-                    <!-- Index 1: Görsel (KİLİTLİ) -->
+                    <th style="display:none;">ID</th>
                     <th class="static-header" style="width: 8%">Görsel</th>
-
-                    <th style="width: 20%">Ürün Adı</th>
-                    <th style="width: 15%">Kategori</th>
-                    <th style="width: 15%">Seri No</th>
+                    <th>Ürün Adı</th>
+                    <th>Kategori</th>
+                    <th>Seri No</th>
                     <th style="width: 12%">Fiyat</th>
-                    <th class="text-center" style="width: 10%">Durum</th>
-
-                    <!-- Index 7: İşlemler (KİLİTLİ) -->
+                    <th class="text-center">Durum</th>
                     <th class="static-header text-right" style="width: 15%">İşlemler</th>
                 </tr>
             </thead>
@@ -87,37 +105,44 @@
                 {
                     <tr>
                         <td style="display:none;">@item.Id</td>
-
                         <td class="text-center">
                             @{
                                 var listImg = string.IsNullOrWhiteSpace(item.ImageUrl) ? "/img/no-image.png" : "/img/assets/" + item.ImageUrl;
                             }
                             <img src="@listImg" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='/img/no-image.png';" />
                         </td>
-
                         <td>
                             <strong>@item.AssetName</strong><br />
                             <small class="text-muted">Alım: @item.PurchaseDate.ToString("dd.MM.yyyy")</small>
                         </td>
-
                         <td><span class="badge badge-info">@item.Category?.Name</span></td>
                         <td>@item.SerialNo</td>
 
-                        <!-- Fiyat: Saf Sayı (JS ile formatlanacak) -->
+                        <!-- Saf Sayı -->
                         <td>@item.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)</td>
 
                         <td class="text-center">
                             @{
                                 var status = item.Status?.Name ?? "Bilinmiyor";
-                                var badgeColor = status.Contains("Sağlam") || status.Contains("Zimmetli") || status.Contains("Kullanılabilir") ? "success" :
-                                (status.Contains("Hurda") || status.Contains("Arızalı") ? "danger" : "warning");
+                                var badgeColor = status.Contains("Sağlam") || status.Contains("Zimmetli") || status.Contains("Kullanılabilir") ? "success" : "warning";
+                                if (status.Contains("Hurda") || status.Contains("Arızalı")) { badgeColor = "danger"; }
                             }
                             <span class="badge badge-@badgeColor">@status</span>
                         </td>
 
                         <td class="project-actions text-right">
-                            <a class="btn btn-info btn-sm" href="/Asset/Edit/@item.Id"><i class="fas fa-pencil-alt"></i></a>
-                            <a class="btn btn-danger btn-sm" href="/Asset/Delete/@item.Id" onclick="return confirm('Bu demirbaşı silmek istediğinize emin misiniz?');"><i class="fas fa-trash"></i></a>
+                            @if (isAdmin)
+                            {
+                                <!-- ADMIN: Canlı Butonlar -->
+                                <a class="btn btn-info btn-sm" href="/Asset/Edit/@item.Id"><i class="fas fa-pencil-alt"></i> Düzenle</a>
+                                <a class="btn btn-danger btn-sm" href="/Asset/Delete/@item.Id" onclick="return confirm('Silinsin mi?');"><i class="fas fa-trash"></i> Sil</a>
+                            }
+                            else
+                            {
+                                <!-- USER: Gri ve Tıklanamaz Buton Görünümlü Spanlar -->
+                                <span class="disabled-action-btn"><i class="fas fa-pencil-alt"></i> Düzenle</span>
+                                <span class="disabled-action-btn"><i class="fas fa-trash"></i> Sil</span>
+                            }
                         </td>
                     </tr>
                 }
@@ -141,23 +166,14 @@
                 "lengthChange": true,
                 "autoWidth": false,
                 "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" },
-
-                // Varsayılan Sıralama: Fiyat (Index 5) - Pahalıdan Ucuza
                 "order": [[5, "desc"]],
-
                 "columnDefs": [
-                    { "targets": [0], "visible": false }, // ID Gizle
-
-                    // Görsel (1) ve İşlemler (7) sütunlarını sıralamaya ve aramaya kapat
-                    { "targets": [1, 7], "orderable": false, "searchable": false },
-
-                    // Fiyat (5) sütunu ayarları (Saf sayı sırala, TL göster)
+                    { "targets": [0], "visible": false },
+                    { "targets": [1, 7], "orderable": false },
                     {
                         "targets": 5,
                         "render": function (data, type, row) {
-                            if (type === 'sort' || type === 'type') {
-                                return parseFloat(data);
-                            }
+                            if (type === 'sort' || type === 'type') { return parseFloat(data); }
                             var val = parseFloat(data);
                             return '₺ ' + val.toLocaleString('tr-TR', { minimumFractionDigits: 0 });
                         }
