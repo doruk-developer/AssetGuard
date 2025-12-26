@@ -310,5 +310,23 @@ namespace AssetGuard.WebUI.Controllers
                 }
             }
         }
+
+        [HttpGet]
+        public IActionResult Details(int id)
+        {
+            var asset = _assetService.TGetById(id); // Senin metodun TGetById imiş
+            if (asset == null) return RedirectToAction("Index");
+
+            // QR kodun içine yazılacak linki dinamik oluştur
+            var scheme = Request.Scheme;
+            var host = Request.Host.Value;
+            var detailUrl = $"{scheme}://{host}/Asset/Details/{id}";
+
+            // QR kodu üret ve ViewBag ile sayfaya gönder
+            ViewBag.QrCodeImage = _assetService.GenerateQrCode(detailUrl);
+
+            return View(asset);
+        }
+
     }
 }

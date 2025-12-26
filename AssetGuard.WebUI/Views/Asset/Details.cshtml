@@ -1,0 +1,185 @@
+﻿@model AssetGuard.Entity.Asset
+@{
+    ViewData["Title"] = Model.AssetName + " - Demirbaş Detayı";
+}
+
+<div class="row">
+    <!-- SOL TARAF: CİHAZ BİLGİLERİ -->
+    <div class="col-md-8">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-info-circle mr-1 text-primary"></i> Demirbaş Bilgileri</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <strong><i class="fas fa-barcode mr-1"></i> Seri No</strong>
+                        <p class="text-muted">@Model.SerialNo</p>
+                        <hr>
+                        <strong><i class="fas fa-tag mr-1"></i> Kategori</strong>
+                        <p class="text-muted">@(Model.Category?.Name ?? "Belirtilmemiş")</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <strong><i class="fas fa-money-bill-wave mr-1"></i> Fiyat</strong>
+                        <p class="text-muted">@Model.Price.ToString("C2")</p>
+                        <hr>
+                        <strong><i class="fas fa-calendar-alt mr-1"></i> Garanti Bitiş</strong>
+                        <p class="text-muted">@(Model.WarrantyEndDate?.ToShortDateString() ?? "Belirtilmemiş")</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="/Asset/Index" class="btn btn-default"><i class="fas fa-arrow-left mr-1"></i> Listeye Dön</a>
+                <a href="/Asset/Edit/@Model.Id" class="btn btn-warning float-right text-white"><i class="fas fa-edit mr-1"></i> Düzenle</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAĞ TARAF: QR KOD ALANI -->
+    <div class="col-md-4">
+        <div class="card card-info card-outline">
+            <div class="card-header text-center">
+                <h3 class="card-title"><i class="fas fa-qrcode mr-1 text-info"></i> Kimlik Etiketi (QR)</h3>
+            </div>
+            <div class="card-body text-center">
+                <!-- QR Kod Resmi (ID Önemli: assetQrCode) -->
+                <img src="@ViewBag.QrCodeImage" id="assetQrCode" class="img-fluid border p-2 mb-3" style="max-width: 220px; background: #fff;" />
+
+                <div class="dropdown">
+                    <button class="btn btn-primary btn-block dropdown-toggle shadow-sm" type="button" id="labelMenu" data-toggle="dropdown">
+                        <i class="fas fa-tag mr-2"></i> Etiket Yönetimi
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right w-100">
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="downloadLabel()">
+                            <i class="fas fa-download mr-2 text-primary"></i> Resim Olarak İndir (PNG)
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="printQr()">
+                            <i class="fas fa-print mr-2 text-success"></i> Etiketi Yazdır
+                        </a>
+                    </div>
+                </div>
+                <p class="text-muted small mt-3 italic">Bu etiket fiziksel takip için cihaz üzerine yapıştırılmalıdır.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GİZLİ TUVAL (CANVAS) - ID Önemli: labelCanvas -->
+<!-- Bu element olmazsa İndirme fonksiyonu çalışmaz! -->
+<canvas id="labelCanvas" style="display:none;"></canvas>
+
+@section Scripts {
+    <script>
+        // --- 1. GÜVENLİ VERİ AKTARIMI ---
+        var assetName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AssetName ?? ""));
+        var serialNo = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SerialNo ?? ""));
+
+        // --- 2. RESİM İNDİRME FONKSİYONU ---
+        function downloadLabel() {
+            try {
+                var canvas = document.getElementById('labelCanvas');
+                var img = document.getElementById('assetQrCode');
+
+                if (!canvas || !img) {
+                    alert("Hata: Gerekli elementler (Canvas veya QR Resim) sayfada bulunamadı.");
+                    return;
+                }
+
+                var ctx = canvas.getContext('2d');
+
+                // Tuval Boyutları
+                canvas.width = 600;
+                canvas.height = 300;
+
+                // Arkaplan (Beyaz)
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Çerçeve
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 4;
+                ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+
+                // QR Kodunu Çiz (Resim yüklenmiş mi kontrolü)
+                if (img.complete && img.naturalHeight !== 0) {
+                    ctx.drawImage(img, 20, 25, 250, 250);
+                } else {
+                    // Resim henüz yüklenmediyse bekle (Nadir durum)
+                    img.onload = function() {
+                        ctx.drawImage(img, 20, 25, 250, 250);
+                    };
+                }
+
+                // Metinleri Yaz
+                ctx.fillStyle = "#000000";
+
+                ctx.font = "bold 30px Arial";
+                ctx.fillText("ASSETGUARD", 290, 60);
+
+                ctx.fillRect(290, 75, 280, 3); // Çizgi
+
+                ctx.font = "bold 20px Arial";
+                ctx.fillText("ÜRÜN:", 290, 110);
+
+                ctx.font = "20px Arial";
+                ctx.fillText(assetName, 290, 135, 280);
+
+                ctx.font = "bold 20px Arial";
+                ctx.fillText("SERİ NO:", 290, 180);
+
+                ctx.font = "24px Courier New";
+                ctx.fillText(serialNo, 290, 210);
+
+                ctx.fillStyle = "#666666";
+                ctx.font = "italic 14px Arial";
+                ctx.fillText("Demirbaş Takip Sistemi", 290, 270);
+
+                // İndir
+                var link = document.createElement('a');
+                link.download = 'Etiket_' + serialNo + '.png';
+                link.href = canvas.toDataURL("image/png");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (err) {
+                console.error(err);
+                alert("Resim oluşturulurken hata çıktı: " + err.message);
+            }
+        }
+
+        // --- 3. YAZDIRMA FONKSİYONU ---
+        function printQr() {
+            try {
+                var qrSrc = document.getElementById('assetQrCode').src;
+                var printWin = window.open('', '', 'width=500,height=400');
+
+                // KRİTİK DÜZELTME BURADA:
+                // Visual Studio'nun araya kod sıkıştırmaması için tagleri parçaladık ('</bo' + 'dy>')
+
+                var content = '<html><head><title>Yazdır - ' + assetName + '</title>';
+                content += '<style>body { font-family: sans-serif; text-align: center; border: 2px dashed #333; margin: 20px; padding: 20px; } .serial { font-weight: bold; font-size: 18px; margin-top: 10px; }</style>';
+                content += '</head><body>';
+                content += '<h2>ASSETGUARD</h2>';
+                content += '<p>Demirbaş Takip Etiketi</p>';
+                content += '<img src="' + qrSrc + '" width="200" />';
+                content += '<div><strong>' + assetName + '</strong></div>';
+                content += '<div class="serial">SN: ' + serialNo + '</div>';
+                content += '</bo' + 'dy></ht' + 'ml>'; // <-- BURASI DÜZELTİLDİ
+
+                printWin.document.write(content);
+                printWin.document.close();
+                printWin.focus();
+
+                setTimeout(function() {
+                    printWin.print();
+                    printWin.close();
+                }, 500);
+
+            } catch (err) {
+                console.error(err);
+                alert("Yazdırma hatası: " + err.message);
+            }
+        }
+    </script>
+}

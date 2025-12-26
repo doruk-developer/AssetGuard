@@ -1,182 +1,169 @@
-﻿<!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
-    
-    <!-- Brand Logo -->
-    <a href="/" class="brand-link">
-        <img src="~/dist/img/assetguard-logo.png" alt="AssetGuard Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <span class="brand-text font-weight-bold">ASSETGUARD</span>
-    </a>
+﻿<!-- DİKKAT: Burada <aside> etiketi YOK. Logo YOK. -->
+<!-- Bunlar _Layout tarafında yönetiliyor ki renk değişimi her yere etki etsin. -->
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <!-- Sidebar user panel -->
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
-            <div class="image">
-                <img src="~/dist/img/avatar5.png" class="img-circle elevation-2" alt="User Image">
-            </div>
-            
+<div class="sidebar">
+    <!-- Sidebar User Panel -->
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+        <div class="image">
+            <img src="~/dist/img/avatar5.png" class="img-circle elevation-2" alt="User Image">
         </div>
-
-        <!-- Sidebar Menu -->
-        <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-
-                <!-- 1. GENEL -->
-                <li class="nav-item">
-                    <a href="/" class="nav-link">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>Genel Bakış</p>
-                    </a>
-                </li>
-
-                <li class="nav-header">OPERASYONEL YÖNETİM</li>
-
-                <!-- 2. DEMİRBAŞ YÖNETİMİ -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-boxes"></i>
-                        <p>
-                            Demirbaş İşlemleri
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="/Asset/Index" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Tüm Demirbaşlar</p>
-                            </a>
-                        </li>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a href="/Asset/Create" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Yeni Giriş Yap</p>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </li>
-
-                <!-- 3. ZİMMET YÖNETİMİ -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-handshake"></i>
-                        <p>Zimmet Hareketleri <i class="right fas fa-angle-left"></i></p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <!-- LİSTELEME: Herkes Görür -->
-                        <li class="nav-item">
-                            <a href="/Assignment/Index" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Zimmet Geçmişi</p>
-                            </a>
-                        </li>
-
-                        <!-- ZİMMET ATA: SADECE ADMIN GÖRÜR -->
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a href="/Assignment/Create" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Zimmet Ata</p>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </li>
-
-                <!-- 4. PERSONEL YÖNETİMİ -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-users"></i>
-                        <p>
-                            Personel Yönetimi
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <!-- LİSTELEME: Herkes Görür -->
-                        <li class="nav-item">
-                            <a href="/Employee/Index" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Personel Listesi</p>
-                            </a>
-                        </li>
-
-                        <!-- YENİ EKLEME: Sadece Admin Görür -->
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-                                <a href="/Employee/Create" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Yeni Personel</p>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </li>
-
-                <li class="nav-header">SİSTEM VE AYARLAR</li>
-
-                <!-- 5. SİSTEM TANIMLARI (HEPSİ BURADA) -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-cogs"></i>
-                        <p>
-                            Sistem Tanımları
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="/Category/Index" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Kategoriler</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/Department/Index" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Departmanlar</p>
-                            </a>
-                        </li>
-                        <!-- İŞTE EKSİK OLAN LİNK: -->
-                        <li class="nav-item">
-                            <a href="/AssetStatus/Index" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Demirbaş Durumları</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- 6. DİĞERLERİ -->
-                <li class="nav-item">
-                    <a href="/Report/Index" class="nav-link">
-                        <i class="nav-icon fas fa-chart-pie"></i>
-                        <p>Raporlar</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/Settings/Index" class="nav-link">
-                        <i class="nav-icon fas fa-tools"></i>
-                        <p>Ayarlar</p>
-                    </a>
-                </li>
-
-                <!-- ÇIKIŞ YAP (MENÜNÜN SON ÖĞESİ) -->
-                <li class="nav-item mt-3 pb-3">
-                    <a href="/Account/Logout" class="btn btn-block btn-light text-danger font-weight-bold" style="border: 2px solid #dc3545;">
-                        <i class="fas fa-sign-out-alt mr-2"></i> Güvenli Çıkış
-                    </a>
-                </li>
-
-            </ul>
-        </nav>
-        <!-- /.sidebar-menu -->
+        <div class="info">
+            <!-- Dinamik İsim Gösterimi -->
+            <a href="#" class="d-block">@(User.Identity.Name ?? "Misafir")</a>
+        </div>
     </div>
-    <!-- /.sidebar -->
-   
-</aside>
+
+    <!-- Sidebar Menu -->
+    <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+            <!-- 1. GENEL -->
+            <li class="nav-item">
+                <a href="/" class="nav-link">
+                    <i class="nav-icon fas fa-tachometer-alt"></i>
+                    <p>Genel Bakış</p>
+                </a>
+            </li>
+
+            <li class="nav-header">OPERASYONEL YÖNETİM</li>
+
+            <!-- 2. DEMİRBAŞ YÖNETİMİ -->
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-boxes"></i>
+                    <p>
+                        Demirbaş İşlemleri
+                        <i class="right fas fa-angle-left"></i>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="/Asset/Index" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Tüm Demirbaşlar</p>
+                        </a>
+                    </li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a href="/Asset/Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Yeni Giriş Yap</p>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+
+            <!-- 3. ZİMMET YÖNETİMİ -->
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-handshake"></i>
+                    <p>Zimmet Hareketleri <i class="right fas fa-angle-left"></i></p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="/Assignment/Index" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Zimmet Geçmişi</p>
+                        </a>
+                    </li>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a href="/Assignment/Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Zimmet Ata</p>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+
+            <!-- 4. PERSONEL YÖNETİMİ -->
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-users"></i>
+                    <p>
+                        Personel Yönetimi
+                        <i class="right fas fa-angle-left"></i>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="/Employee/Index" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Personel Listesi</p>
+                        </a>
+                    </li>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a href="/Employee/Create" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Yeni Personel</p>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+
+            <li class="nav-header">SİSTEM VE AYARLAR</li>
+
+            <!-- 5. SİSTEM TANIMLARI -->
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="nav-icon fas fa-cogs"></i>
+                    <p>
+                        Sistem Tanımları
+                        <i class="right fas fa-angle-left"></i>
+                    </p>
+                </a>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="/Category/Index" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Kategoriler</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/Department/Index" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Departmanlar</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/AssetStatus/Index" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Demirbaş Durumları</p>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- 6. RAPOR VE AYARLAR -->
+            <li class="nav-item">
+                <a href="/Report/Index" class="nav-link">
+                    <i class="nav-icon fas fa-chart-pie"></i>
+                    <p>Raporlar</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/Settings/Index" class="nav-link">
+                    <i class="nav-icon fas fa-tools"></i>
+                    <p>Ayarlar</p>
+                </a>
+            </li>
+
+            <!-- ÇIKIŞ YAP -->
+            <li class="nav-item mt-3 pb-3">
+                <a href="/Account/Logout" class="btn btn-block btn-outline-danger font-weight-bold">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Güvenli Çıkış
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+</div>

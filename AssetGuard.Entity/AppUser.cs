@@ -18,4 +18,7 @@ public class AppUser : IdentityUser
     /// </summary>
     public string LastName { get; set; } = null!;
 
+    // Yeni eklenen alan: Tüm tema tercihlerini JSON formatında saklayacak.
+    public string? ThemeSettingsJson { get; set; }
+
 }

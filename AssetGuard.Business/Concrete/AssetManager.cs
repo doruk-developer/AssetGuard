@@ -1,6 +1,7 @@
 ﻿using AssetGuard.Business.Abstract;
 using AssetGuard.DataAccess.Abstract;
 using AssetGuard.Entity;
+using QRCoder;
 
 namespace AssetGuard.Business.Concrete
 {
@@ -78,5 +79,15 @@ namespace AssetGuard.Business.Concrete
             return _assetDal.GetAll();
         }
 
+        public string GenerateQrCode(string detailUrl)
+        {
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            using (QRCodeData qrCodeData = qrGenerator.CreateQrCode(detailUrl, QRCodeGenerator.ECCLevel.Q))
+            using (PngByteQRCode qrCode = new PngByteQRCode(qrCodeData))
+            {
+                byte[] qrCodeAsPngByteArr = qrCode.GetGraphic(20);
+                return $"data:image/png;base64,{Convert.ToBase64String(qrCodeAsPngByteArr)}";
+            }
+        }
     }
 }

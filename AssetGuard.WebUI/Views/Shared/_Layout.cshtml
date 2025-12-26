@@ -1,69 +1,136 @@
-﻿<!DOCTYPE html>
-<html lang="tr">
+﻿@using Microsoft.AspNetCore.Identity
+@using AssetGuard.Entity
+@using AssetGuard.WebUI.Models
+@using System.Text.Json
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+
+@{
+    // --- GÜVENLİ BAŞLANGIÇ (SAFE MODE) ---
+    var settings = new UserThemeSettings();
+    string bodyClass = "";
+    string navbarClass = "navbar-white navbar-light";
+    string sidebarModeClass = "sidebar-dark-primary";
+    string customSidebarStyle = "";
+
+    try
+    {
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            var userName = User.Identity.Name;
+            // System.IO.Path kullanarak çakışmayı önlüyoruz
+            string folderPath = System.IO.Path.Combine(Env.ContentRootPath, "ThemeData");
+            string filePath = System.IO.Path.Combine(folderPath, $"{userName}_settings.json");
+
+            if (System.IO.File.Exists(filePath))
+            {
+                string jsonContent = System.IO.File.ReadAllText(filePath);
+                settings = JsonSerializer.Deserialize<UserThemeSettings>(jsonContent) ?? new UserThemeSettings();
+            }
+
+            // 1. Dark Mode
+            if (settings.IsDarkMode)
+            {
+                bodyClass = "dark-mode";
+                navbarClass = "navbar-dark";
+            }
+
+            // 2. Sidebar Metin Rengi (Koyu/Açık)
+            var lightColors = new[] { "white", "warning", "teal", "light" };
+            bool isLightSidebar = lightColors.Contains((settings.SidebarColor ?? "").ToLower());
+            sidebarModeClass = isLightSidebar ? "sidebar-light-primary" : "sidebar-dark-primary";
+
+            // 3. Sidebar Arkaplan Rengi
+            var colorMap = new Dictionary<string, string> {
+                {"primary", "#007bff"}, {"secondary", "#6c757d"}, {"success", "#28a745"},
+                {"danger", "#dc3545"}, {"warning", "#ffc107"}, {"info", "#17a2b8"},
+                {"dark", "#343a40"}, {"indigo", "#6610f2"}, {"navy", "#001f3f"},
+                {"purple", "#6f42c1"}, {"teal", "#20c997"}, {"white", "#ffffff"}
+            };
+
+            if (settings.SidebarColor != "default" && !string.IsNullOrEmpty(settings.SidebarColor) && colorMap.TryGetValue(settings.SidebarColor, out var hex))
+            {
+                customSidebarStyle = $"background-color: {hex} !important;";
+            }
+        }
+    }
+    catch
+    {
+        // Hata durumunda varsayılan (Clean) açılış
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AssetGuard | @ViewData["Title"]</title>
 
-    <!-- Google Font: Source Sans Pro -->
+    <!-- Stil Dosyaları -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <!-- Tempusdominus Bootstrap 4 -->
-    <link rel="stylesheet" href="~/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
-    <!-- iCheck -->
-    <link rel="stylesheet" href="~/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-
-    <!-- DataTables -->
-    <link rel="stylesheet" href="~/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" href="~/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-
-    <!-- Toastr (Bildirimler) -->
-    <link rel="stylesheet" href="~/plugins/toastr/toastr.min.css" />
-
-    <!-- Theme style -->
     <link rel="stylesheet" href="~/dist/css/adminlte.min.css">
-    <!-- overlayScrollbars -->
     <link rel="stylesheet" href="~/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+    <link rel="stylesheet" href="~/plugins/toastr/toastr.css" />
+    <link rel="stylesheet" href="~/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+
+    <style>
+        body {
+            font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+        }
+
+        .nav-sidebar .nav-link {
+            border-radius: 8px;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+
+        .card {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        }
+        /* AdminLTE düzeltmeleri */
+        .bg-warning {
+            color: #1f2d3d !important;
+        }
+    </style>
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini layout-fixed @bodyClass">
     <div class="wrapper">
 
         <!-- Navbar -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <nav class="main-header navbar navbar-expand @navbarClass">
             <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a></li>
+                <li class="nav-item d-none d-sm-inline-block"><a href="/" class="nav-link">Ana Sayfa</a></li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="/" class="nav-link">Ana Sayfa</a>
+                    <a class="nav-link" data-widget="fullscreen" href="#" role="button"><i class="fas fa-expand-arrows-alt"></i></a>
                 </li>
             </ul>
         </nav>
-        <!-- /.navbar -->
-        <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <!-- Sidebar Partial Çağrısı -->
+
+        <!-- Sidebar -->
+        <aside class="main-sidebar @sidebarModeClass elevation-4" style="@customSidebarStyle">
+            <a href="/" class="brand-link" style="@customSidebarStyle">
+                <img src="~/dist/img/assetguard-logo.png" alt="AG" class="brand-image img-circle elevation-3" style="opacity: .8">
+                <span class="brand-text font-weight-bold">ASSETGUARD</span>
+            </a>
             <partial name="_Sidebar" />
         </aside>
 
-        <!-- Content Wrapper -->
+        <!-- İçerik -->
         <div class="content-wrapper">
-            <!-- Content Header -->
             <div class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">@ViewData["Title"]</h1>
-                        </div>
+                        <div class="col-sm-6"><h1 class="m-0">@ViewData["Title"]</h1></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
                     @RenderBody()
@@ -71,83 +138,35 @@
             </section>
         </div>
 
-        <!-- Footer -->
         <footer class="main-footer">
-            <strong>Copyright &copy; @DateTime.Now.Year <a href="#">AssetGuard</a>.</strong>
-            Tüm hakları saklıdır.
-            <div class="float-right d-none d-sm-inline-block">
-                <b>Version</b> 1.0.0
-            </div>
+            <strong>Copyright &copy; @DateTime.Now.Year AssetGuard.</strong>
         </footer>
-
-        <aside class="control-sidebar control-sidebar-dark">
-            <!-- Control sidebar content goes here -->
-        </aside>
     </div>
 
-    <!-- SCRIPTS -->
-    <!-- jQuery -->
+    <!-- SCRIPTS (SIRALAMA ÇOK ÖNEMLİ) -->
     <script src="~/plugins/jquery/jquery.min.js"></script>
-    <!-- jQuery UI 1.11.4 -->
-    <script src="~/plugins/jquery-ui/jquery-ui.min.js"></script>
-    <script>
-        $.widget.bridge('uibutton', $.ui.button)
-    </script>
-    <!-- Bootstrap 4 -->
     <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-    <!-- DataTables & Plugins -->
+    <!-- ChartJS Dashboard Hatası için Buraya Eklendi -->
+    <script src="~/plugins/chart.js/Chart.min.js"></script>
+
+    <script src="~/dist/js/adminlte.js"></script>
+    <script src="~/plugins/toastr/toastr.min.js"></script>
     <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="~/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="~/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-
-    <!-- ChartJS -->
-    <script src="~/plugins/chart.js/Chart.min.js"></script>
-    <!-- Sparkline -->
-    <script src="~/plugins/sparklines/sparkline.js"></script>
-    <!-- daterangepicker -->
-    <script src="~/plugins/moment/moment.min.js"></script>
-    <script src="~/plugins/daterangepicker/daterangepicker.js"></script>
-    <!-- Tempusdominus Bootstrap 4 -->
-    <script src="~/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
-    <!-- Summernote -->
-    <script src="~/plugins/summernote/summernote-bs4.min.js"></script>
-    <!-- overlayScrollbars -->
-    <script src="~/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="~/dist/js/adminlte.js"></script>
-
-    <!-- Toastr (Bildirimler) -->
-    <script src="~/plugins/toastr/toastr.min.js"></script>
-
-    <!-- Global Scripts & Toastr Logic -->
-    <script>
-        $(document).ready(function () {
-            // Toastr Ayarları
-            toastr.options = {
-                "closeButton": true,
-                "progressBar": true,
-                "positionClass": "toast-top-right",
-                "showDuration": "300",
-                "hideDuration": "1000",
-                "timeOut": "5000",
-                "extendedTimeOut": "1000"
-            };
-
-            // Backend'den gelen mesajları yakala
-            var successMsg = '@TempData["Success"]';
-            var errorMsg = '@TempData["Error"]';
-            var warningMsg = '@TempData["Warning"]';
-            var infoMsg = '@TempData["Info"]';
-
-            if (successMsg) { toastr.success(successMsg, "Başarılı"); }
-            if (errorMsg) { toastr.error(errorMsg, "Hata"); }
-            if (warningMsg) { toastr.warning(warningMsg, "Dikkat"); }
-            if (infoMsg) { toastr.info(infoMsg, "Bilgi"); }
-        });
-    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            toastr.options = { "closeButton": true, "progressBar": true, "positionClass": "toast-top-right", "timeOut": "4000" };
+
+            var success = '@TempData["SuccessMessage"]';
+            if (success) toastr.success(success);
+
+            var error = '@TempData["ErrorMessage"]';
+            if (error) toastr.error(error);
+        });
+    </script>
 </body>
 </html>
