@@ -1,7 +1,9 @@
 ﻿using AssetGuard.Business.Abstract;
 using AssetGuard.DataAccess.Abstract;
 using AssetGuard.Entity;
+using AssetGuard.Entity.DTOs;
 using QRCoder;
+using System.Globalization;
 
 namespace AssetGuard.Business.Concrete
 {
@@ -88,6 +90,48 @@ namespace AssetGuard.Business.Concrete
                 byte[] qrCodeAsPngByteArr = qrCode.GetGraphic(20);
                 return $"data:image/png;base64,{Convert.ToBase64String(qrCodeAsPngByteArr)}";
             }
+        }
+
+        // Dashboard İstatistikleri(Filtreleme Sistemi) için
+        public DashboardStatsDTO GetDashboardStatistics(int year, int? categoryId)
+        {
+            // 1. Veriyi Çek (Filtreleme Mantığı)
+            var query = _assetDal.GetAll(); // Tüm veriyi getir
+
+            // Yıl Filtresi
+            if (year > 0)
+            {
+                query = query.Where(x => x.PurchaseDate.Year == year).ToList();
+            }
+
+            // Kategori Filtresi
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                query = query.Where(x => x.CategoryId == categoryId.Value).ToList();
+            }
+
+            // 2. İstatistikleri Hesapla (Business Logic)
+            var stats = new DashboardStatsDTO
+            {
+                TotalAssetCount = query.Count,
+                // Durum tablosunda "Arızalı" geçenleri say (Null kontrolü ile)
+                BrokenAssetCount = query.Count(x => x.Status != null && x.Status.Name.Contains("Arızalı")),
+                // Toplam Fiyatı TL formatına çevir
+                TotalValue = query.Sum(x => x.Price).ToString("C0", new CultureInfo("tr-TR")),
+
+                ChartLabels = new List<string> { "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" },
+                ChartValues = new List<decimal>()
+            };
+
+            // 3. Grafik Verisini Hazırla (Aylık Döngü)
+            for (int i = 1; i <= 12; i++)
+            {
+                // O ayın toplam harcaması
+                var monthTotal = query.Where(x => x.PurchaseDate.Month == i).Sum(x => x.Price);
+                stats.ChartValues.Add(monthTotal);
+            }
+
+            return stats;
         }
     }
 }

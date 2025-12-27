@@ -1,4 +1,5 @@
 ﻿using AssetGuard.Entity;
+using AssetGuard.Entity.DTOs;
 
 namespace AssetGuard.Business.Abstract
 {
@@ -20,5 +21,8 @@ namespace AssetGuard.Business.Abstract
         List<Asset> TGetAllWithDetails(); // Mali Rapor (ve Arıza için de lazım)
 
         string GenerateQrCode(string detailUrl);
+
+        // Dashboard için filtreli veri getiren metot
+        DashboardStatsDTO GetDashboardStatistics(int year, int? categoryId);
     }
 }

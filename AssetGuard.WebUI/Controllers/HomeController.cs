@@ -1,46 +1,58 @@
 using AssetGuard.Business.Abstract;
 using AssetGuard.WebUI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AssetGuard.WebUI.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
-        // Servisleri Tanýmlýyoruz
+        // --- 1. ALANLAR (FIELDS) - Sadece birer kez tanýmlanmalý ---
         private readonly IAssetService _assetService;
         private readonly IReportService _reportService;
-        private readonly IAssignmentService _assignmentService; // YENÝ
-        private readonly IEmployeeService _employeeService;     // YENÝ
+        private readonly IAssignmentService _assignmentService;
+        private readonly IEmployeeService _employeeService;
+        private readonly ICategoryService _categoryService; // Filtreler için eklendi
 
-        // Constructor Injection: 4 servisi birden talep ediyoruz (DÜZELTÝLEN KISIM)
-        public HomeController(IAssetService assetService, IReportService reportService, IAssignmentService assignmentService, IEmployeeService employeeService)
+        // --- 2. CONSTRUCTOR (YAPICI METOT) - Hepsini tek seferde enjekte ediyoruz ---
+        public HomeController(
+            IAssetService assetService,
+            IReportService reportService,
+            IAssignmentService assignmentService,
+            IEmployeeService employeeService,
+            ICategoryService categoryService)
         {
             _assetService = assetService;
             _reportService = reportService;
             _assignmentService = assignmentService;
             _employeeService = employeeService;
+            _categoryService = categoryService;
         }
 
+        // --- 3. INDEX ACTION (SAYFA AÇILIÞI) ---
         public IActionResult Index()
         {
-            // 1. Genel Ýstatistikleri Çek
+            // A. Mevcut Ýstatistikleri Çek
             var toplamUrun = _assetService.TGetTotalAssetCount();
             var toplamDeger = _assetService.TGetTotalInventoryValue();
             var personelSayisi = _employeeService.TGetAll().Count;
+            // Not: Status iliþkisini manager'da çözdüðümüz için burayý sadeleþtirebilirsin veya böyle býrakabilirsin.
+            // Eðer hata alýrsan Manager'a yeni metot yazmamýz gerekebilir, þimdilik eski kodunu korudum:
             var arizaliSayisi = _assetService.TGetAssetsByStatus("Arýzalý").Count;
 
-            // 2. Grafik Verilerini Çek
+            // B. Grafik Verilerini Çek
             var categoryReport = _reportService.GetAssetDistributionReport();
             var expenseReport = _reportService.GetMonthlyExpenseReport();
 
-            // 3. Tablo Verileri (Son 5 Kayýt) -- (EKSÝK OLAN KISIM EKLENDÝ)
+            // C. Tablo Verileri (Son 5 Kayýt)
             var sonZimmetler = _assignmentService.TGetAllWithDetails().Take(5).ToList();
             var yeniUrunler = _assetService.TGetAllWithDetails()
                                            .OrderByDescending(x => x.Id)
                                            .Take(5)
                                            .ToList();
 
-            // 4. Verileri Kutuya (ViewModel) Doldur
+            // D. Verileri Kutuya (ViewModel) Doldur
             var model = new DashboardViewModel
             {
                 // KPI Kutularý
@@ -57,11 +69,24 @@ namespace AssetGuard.WebUI.Controllers
 
                 // Tablolar
                 LastAssignments = sonZimmetler,
-                NewAssets = yeniUrunler
+                NewAssets = yeniUrunler,
+
+                // --- FÝLTRE ÝÇÝN KATEGORÝ LÝSTESÝ (ViewBag Yerine Buradan) ---
+                CategoryList = _categoryService.TGetAll()
             };
 
-            // 5. Kutuyu Sayfaya Gönder
+            // E. Kutuyu Sayfaya Gönder
             return View(model);
+        }
+
+        // Filtrelenmiþ Ýstatistikleri Getir (AJAX için)
+        [HttpGet]
+        public IActionResult GetFilterStats(int year, int? categoryId)
+        {
+            // Business katmanýndaki DTO dönen metodu çaðýrýyoruz
+            var stats = _assetService.GetDashboardStatistics(year, categoryId);
+            return Json(stats);
         }
     }
 }
+

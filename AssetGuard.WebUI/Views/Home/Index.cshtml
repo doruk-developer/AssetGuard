@@ -1,15 +1,57 @@
 ﻿@model AssetGuard.WebUI.Models.DashboardViewModel
-
 @{
     ViewData["Title"] = "Genel Bakış";
 }
 
-<!-- 1. KPI KUTULARI (CANLI) -->
+<!-- 1. FİLTRELEME PANELİ (TOGGLE SİSTEMLİ) -->
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body p-2 bg-light rounded">
+        <div class="row align-items-center">
+            <!-- Anahtar -->
+            <div class="col-md-3 border-right">
+                <div class="custom-control custom-switch mt-1">
+                    <input type="checkbox" class="custom-control-input" id="filterToggle">
+                    <label class="custom-control-label font-weight-bold text-dark" for="filterToggle">Detaylı Filtreleme</label>
+                </div>
+            </div>
+            <!-- Yıl -->
+            <div class="col-md-3">
+                <select id="filterYear" class="form-control form-control-sm" disabled>
+                    <option value="0" selected>Tüm Yıllar</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                </select>
+            </div>
+            <!-- Kategori -->
+            <div class="col-md-3">
+                <select id="filterCategory" class="form-control form-control-sm" disabled>
+                    <option value="0" selected>Tüm Kategoriler</option>
+                    @if (Model.CategoryList != null)
+                    {
+                        foreach (var cat in Model.CategoryList)
+                        {
+                            <option value="@cat.Id">@cat.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <!-- Buton -->
+            <div class="col-md-2">
+                <button id="btnUpdate" class="btn btn-secondary btn-sm w-100" onclick="updateDashboard(this)">
+                    <i class="fas fa-sync-alt mr-1"></i> <span id="btnText">Tümünü Göster</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. BİLGİ KARTLARI (KPI BOXES) -->
 <div class="row">
     <div class="col-lg-3 col-6">
         <div class="small-box bg-info">
             <div class="inner">
-                <h3>@Model.TotalAssetCount</h3>
+                <h3 id="lblTotalCount">@Model.TotalAssetCount</h3>
                 <p>Toplam Demirbaş</p>
             </div>
             <div class="icon"><i class="fas fa-boxes"></i></div>
@@ -19,17 +61,17 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-danger">
             <div class="inner">
-                <h3>@Model.TotalFaultyCount <small style="font-size: 0.5em">Cihaz</small></h3>
+                <h3 id="lblBroken">@Model.TotalFaultyCount</h3>
                 <p>Arızalı / Bakımda</p>
             </div>
             <div class="icon"><i class="fas fa-tools"></i></div>
-            <a href="/Report/Details?type=ariza" class="small-box-footer">Raporu Gör <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="/Report/Index" class="small-box-footer">Raporu Gör <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
     <div class="col-lg-3 col-6">
         <div class="small-box bg-success">
             <div class="inner">
-                <h3>@Model.TotalEmployeeCount <small style="font-size: 0.5em">Kişi</small></h3>
+                <h3>@Model.TotalEmployeeCount</h3>
                 <p>Kayıtlı Personel</p>
             </div>
             <div class="icon"><i class="fas fa-users"></i></div>
@@ -39,30 +81,35 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3>₺ @Model.TotalInventoryValue.ToString("N0")</h3>
+                <h3 id="lblTotalValue">@Model.TotalInventoryValue.ToString("C0")</h3>
                 <p>Envanter Değeri</p>
             </div>
             <div class="icon"><i class="fas fa-coins"></i></div>
-            <a href="/Report/Details?type=mali" class="small-box-footer">Mali Analiz <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="#" class="small-box-footer">Mali Analiz <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
 </div>
 
-<!-- 2. GRAFİKLER (CANLI) -->
+<!-- 3. GRAFİKLER (Harcama Trendi ve Kategori Dağılımı) -->
 <div class="row">
-    <div class="col-lg-7">
-        <div class="card">
-            <div class="card-header border-0">
-                <h3 class="card-title">Harcama Trendi (Son 5 Yıl)</h3>
+    <!-- SOL: Çizgi Grafik (Line Chart) -->
+    <div class="col-md-8">
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Harcama Trendi (Aylık)</h3>
             </div>
             <div class="card-body">
-                <canvas id="purchaseChart" height="200"></canvas>
+                <div class="chart">
+                    <canvas id="revenue-chart-canvas" style="height: 300px;"></canvas>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-5">
-        <div class="card">
-            <div class="card-header border-0">
+
+    <!-- SAĞ: Pasta Grafik (Donut Chart) - GERİ GELDİ -->
+    <div class="col-md-4">
+        <div class="card card-info card-outline">
+            <div class="card-header">
                 <h3 class="card-title">Kategori Dağılımı</h3>
             </div>
             <div class="card-body">
@@ -72,43 +119,42 @@
     </div>
 </div>
 
-<!-- 3. ALT TABLOLAR (ŞİMDİLİK STATİK - GÖRSEL DOLULUK İÇİN) -->
+<!-- 4. ALT TABLOLAR (Zimmetler ve Yeni Girenler) - GERİ GELDİ -->
 <div class="row">
+    <!-- Sol: Son Zimmet Hareketleri -->
     <div class="col-md-8">
         <div class="card">
             <div class="card-header border-transparent">
                 <h3 class="card-title">Son Zimmet Hareketleri</h3>
                 <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
                 </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table m-0">
-                        <thead><tr><th>ID</th><th>Ürün</th><th>Durum</th><th>Personel</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Ürün</th>
+                                <th>Durum</th>
+                                <th>Personel</th>
+                            </tr>
+                        </thead>
                         <tbody>
-                            @foreach (var item in Model.LastAssignments)
+                            @if (Model.LastAssignments != null)
                             {
-                                <tr>
-                                    <td><a href="#">#@item.Id</a></td>
-                                    <td>
-                                        <!-- Null Check ile güvenli hale getirelim -->
-                                        @(item.Asset != null ? item.Asset.AssetName : "Silinmiş Ürün")
-                                    </td>
-                                    <td>
-                                        @if (item.ReturnDate == null)
-                                        {
-                                            <span class="badge badge-success">Aktif Zimmet</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-secondary">İade Alındı</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @(item.Employee != null ? item.Employee.FirstName + " " + item.Employee.LastName : "Silinmiş Personel")
-                                    </td>
-                                </tr>
+                                foreach (var item in Model.LastAssignments)
+                                {
+                                    <tr>
+                                        <td><a href="#">#@item.Id</a></td>
+                                        <td>@(item.Asset?.AssetName ?? "-")</td>
+                                        <td><span class="badge badge-success">Aktif Zimmet</span></td>
+                                        <td>@(item.Employee?.FirstName + " " + item.Employee?.LastName)</td>
+                                    </tr>
+                                }
                             }
                         </tbody>
                     </table>
@@ -121,6 +167,7 @@
         </div>
     </div>
 
+    <!-- Sağ: Envantere Yeni Girenler -->
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
@@ -128,23 +175,27 @@
             </div>
             <div class="card-body p-0">
                 <ul class="products-list product-list-in-card pl-2 pr-2">
-                    @foreach (var item in Model.NewAssets)
+                    @if (Model.NewAssets != null)
                     {
-                        <li class="item">
-                            <div class="product-img">
-                                <!-- Resim yoksa varsayılan ikon göster -->
-                                <img src="~/dist/img/default-150x150.png" alt="Product Image" class="img-size-50">
-                            </div>
-                            <div class="product-info">
-                                <a href="javascript:void(0)" class="product-title">
-                                    @item.AssetName
-                                    <span class="badge badge-warning float-right">₺@item.Price.ToString("N0")</span>
-                                </a>
-                                <span class="product-description">
-                                    @item.Category?.Name / @item.SerialNo
-                                </span>
-                            </div>
-                        </li>
+                        foreach (var item in Model.NewAssets)
+                        {
+                            <li class="item">
+                                <div class="product-img">
+                                    <div class="img-circle img-size-50 bg-secondary d-flex align-items-center justify-content-center" style="height:50px; width:50px;">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+                                </div>
+                                <div class="product-info">
+                                    <a href="/Asset/Details/@item.Id" class="product-title">
+                                        @item.AssetName
+                                        <span class="badge badge-warning float-right">@item.Price.ToString("C0")</span>
+                                    </a>
+                                    <span class="product-description">
+                                        @(item.Category?.Name ?? "-") / @item.SerialNo
+                                    </span>
+                                </div>
+                            </li>
+                        }
                     }
                 </ul>
             </div>
@@ -156,62 +207,142 @@
 </div>
 
 @section Scripts {
+    <script src="~/plugins/chart.js/Chart.min.js"></script>
+
     <script>
-        $(function () {
-            // VERİLERİ JS'E AKTAR
-            var catLabels = @Html.Raw(Json.Serialize(Model.CategoryLabels));
-            var catValues = @Html.Raw(Json.Serialize(Model.CategoryValues));
-            var monthLabels = @Html.Raw(Json.Serialize(Model.MonthlyLabels));
-            var monthValues = @Html.Raw(Json.Serialize(Model.MonthlyValues));
+        var dashboardChart = null;
 
-            // -- DONUT CHART --
-             // 1. Kullanıcının tercihini oku (Yoksa varsayılan 'doughnut' olsun)
-            var userChartType = localStorage.getItem('assetGuard_chartType') || 'doughnut';
+        $(document).ready(function() {
+            // 1. Sayfa Açılışında Çizgi Grafiği Getir (Tüm Veriler)
+            updateDashboard(null);
 
-            var donutChartCanvas = $('#donutChart').get(0).getContext('2d')
-            new Chart(donutChartCanvas, {
-                type: userChartType, // BURASI ARTIK DİNAMİK! ('bar' veya 'doughnut' gelir)
-                data: {
-                    labels: catLabels,
-                    datasets: [{
-                        data: catValues,
-                        backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
-                    }]
+            // 2. Sayfa Açılışında Donut Grafiği (Kategoriler) Çiz
+            // Veriyi Model'den JS'e aktarıyoruz
+            var catLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryLabels));
+            var catValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryValues));
+            initDonutChart(catLabels, catValues);
+
+            // Toggle Değişimi
+            $('#filterToggle').change(function() {
+                var isActive = $(this).is(':checked');
+                $('#filterYear, #filterCategory').prop('disabled', !isActive);
+
+                if(isActive) {
+                    $('#btnUpdate').removeClass('btn-secondary').addClass('btn-primary');
+                    $('#btnText').text('Filtrele ve Getir');
+                } else {
+                    $('#filterYear').val(0);
+                    $('#filterCategory').val(0);
+                    $('#btnUpdate').removeClass('btn-primary').addClass('btn-secondary');
+                    $('#btnText').text('Tümünü Göster');
+                    updateDashboard(null);
+                }
+            });
+        });
+
+        // --- FİLTRELEME FONKSİYONU (ÇİZGİ GRAFİK VE KARTLAR İÇİN) ---
+        function updateDashboard(sender) {
+            var year = $('#filterYear').val();
+            var catId = $('#filterCategory').val();
+
+            var btn = sender;
+            var orgHtml = "";
+
+            if (btn) {
+                orgHtml = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+            }
+
+            $.ajax({
+                url: '/Home/GetFilterStats',
+                type: 'GET',
+                data: { year: year, categoryId: catId },
+                success: function (res) {
+                    // Kartları Güncelle
+                    $('#lblTotalCount').text(res.totalAssetCount);
+                    $('#lblBroken').text(res.brokenAssetCount);
+                    $('#lblTotalValue').text(res.totalValue);
+
+                    // Çizgi Grafiği Güncelle
+                    renderLineChart(res.chartLabels, res.chartValues);
+
+                    if (btn) toastr.success('Veriler güncellendi.');
                 },
-                options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    // Eğer Bar chart seçilirse Y ekseni 0'dan başlasın
-                    scales: {
-                        yAxes: userChartType === 'bar' ? [{ ticks: { beginAtZero: true } }] : []
+                error: function () {
+                    toastr.error('Veri hatası.');
+                },
+                complete: function () {
+                    if (btn) {
+                        btn.innerHTML = orgHtml;
+                        btn.disabled = false;
                     }
                 }
-            })
+            });
+        }
 
-            // -- LINE CHART (Aylık) --
-            var lineChartCanvas = $('#purchaseChart').get(0).getContext('2d')
-            new Chart(lineChartCanvas, {
+        // --- ÇİZGİ GRAFİK (LINE CHART) ÇİZİMİ ---
+        function renderLineChart(labels, data) {
+            var canvas = document.getElementById('revenue-chart-canvas');
+            if (!canvas) return;
+
+            var ctx = canvas.getContext('2d');
+            if (dashboardChart) dashboardChart.destroy();
+
+            dashboardChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: monthLabels,
+                    labels: labels,
                     datasets: [{
-                        label: 'Harcama (TL)',
+                        label: 'Harcama Trendi',
                         backgroundColor: 'rgba(60,141,188,0.2)',
                         borderColor: 'rgba(60,141,188,1)',
                         pointRadius: 3,
-                        pointBackgroundColor: 'rgba(60,141,188,1)',
-                        data: monthValues,
+                        pointBackgroundColor: '#3b8bba',
+                        data: data,
                         fill: true
                     }]
                 },
                 options: {
                     maintainAspectRatio: false,
                     responsive: true,
+                    legend: { display: false },
                     scales: {
-                        yAxes: [{ ticks: { beginAtZero: true } }]
+                        xAxes: [{ gridLines: { display: false } }],
+                        yAxes: [{ gridLines: { display: true } }]
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return "₺ " + Number(tooltipItem.yLabel).toLocaleString('tr-TR');
+                            }
+                        }
                     }
                 }
-            })
-        })
+            });
+        }
+
+        // --- DONUT GRAFİK (KATEGORİ DAĞILIMI) ÇİZİMİ ---
+        function initDonutChart(labels, data) {
+            var donutChartCanvas = $('#donutChart').get(0).getContext('2d');
+            var donutData = {
+                labels: labels,
+                datasets: [
+                    {
+                        data: data,
+                        backgroundColor : ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
+                    }
+                ]
+            }
+            var donutOptions = {
+                maintainAspectRatio : false,
+                responsive : true,
+            }
+            new Chart(donutChartCanvas, {
+                type: 'doughnut',
+                data: donutData,
+                options: donutOptions
+            });
+        }
     </script>
 }
