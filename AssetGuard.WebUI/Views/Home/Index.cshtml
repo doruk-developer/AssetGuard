@@ -207,22 +207,30 @@
 </div>
 
 @section Scripts {
+    <!-- ChartJS Kütüphanesi -->
     <script src="~/plugins/chart.js/Chart.min.js"></script>
 
     <script>
+        // Global grafik değişkenleri
         var dashboardChart = null;
+        var categoryChart = null;
 
         $(document).ready(function() {
             // 1. Sayfa Açılışında Çizgi Grafiği Getir (Tüm Veriler)
             updateDashboard(null);
 
-            // 2. Sayfa Açılışında Donut Grafiği (Kategoriler) Çiz
-            // Veriyi Model'den JS'e aktarıyoruz
-            var catLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryLabels));
-            var catValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryValues));
-            initDonutChart(catLabels, catValues);
+            // 2. Kategori Grafiği Verilerini Model'den Güvenli Şekilde Al
+            // JSON Serialization tırnak hatalarını önler.
+            var catLabels = JSON.parse('@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryLabels))');
+            var catValues = JSON.parse('@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryValues))');
 
-            // Toggle Değişimi
+            // Ayarlardan gelen tercih (bar veya doughnut)
+            var chartTypePref = '@(Model.ChartPreference ?? "doughnut")';
+
+            // Kategori grafiğini çiz
+            initDynamicChart(catLabels, catValues, chartTypePref);
+
+            // 3. Toggle (Filtre Aç/Kapa) Değişimi
             $('#filterToggle').change(function() {
                 var isActive = $(this).is(':checked');
                 $('#filterYear, #filterCategory').prop('disabled', !isActive);
@@ -231,6 +239,7 @@
                     $('#btnUpdate').removeClass('btn-secondary').addClass('btn-primary');
                     $('#btnText').text('Filtrele ve Getir');
                 } else {
+                    // Kapatılınca sıfırla ve hepsini getir
                     $('#filterYear').val(0);
                     $('#filterCategory').val(0);
                     $('#btnUpdate').removeClass('btn-primary').addClass('btn-secondary');
@@ -240,7 +249,7 @@
             });
         });
 
-        // --- FİLTRELEME FONKSİYONU (ÇİZGİ GRAFİK VE KARTLAR İÇİN) ---
+        // --- FİLTRELEME VE GÜNCELLEME FONKSİYONU ---
         function updateDashboard(sender) {
             var year = $('#filterYear').val();
             var catId = $('#filterCategory').val();
@@ -248,6 +257,7 @@
             var btn = sender;
             var orgHtml = "";
 
+            // Butona basıldıysa loading efekti yap
             if (btn) {
                 orgHtml = btn.innerHTML;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -270,7 +280,7 @@
                     if (btn) toastr.success('Veriler güncellendi.');
                 },
                 error: function () {
-                    toastr.error('Veri hatası.');
+                    toastr.error('Veri alınırken hata oluştu.');
                 },
                 complete: function () {
                     if (btn) {
@@ -281,12 +291,14 @@
             });
         }
 
-        // --- ÇİZGİ GRAFİK (LINE CHART) ÇİZİMİ ---
+        // --- SOL TARAF: ÇİZGİ GRAFİK (HARCAMA TRENDİ) ---
         function renderLineChart(labels, data) {
             var canvas = document.getElementById('revenue-chart-canvas');
             if (!canvas) return;
 
             var ctx = canvas.getContext('2d');
+
+            // Varsa eski grafiği temizle
             if (dashboardChart) dashboardChart.destroy();
 
             dashboardChart = new Chart(ctx, {
@@ -322,26 +334,45 @@
             });
         }
 
-        // --- DONUT GRAFİK (KATEGORİ DAĞILIMI) ÇİZİMİ ---
-        function initDonutChart(labels, data) {
-            var donutChartCanvas = $('#donutChart').get(0).getContext('2d');
-            var donutData = {
-                labels: labels,
-                datasets: [
-                    {
-                        data: data,
-                        backgroundColor : ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
-                    }
-                ]
-            }
-            var donutOptions = {
+        // --- SAĞ TARAF: DİNAMİK KATEGORİ GRAFİĞİ (Bar veya Doughnut) ---
+        function initDynamicChart(labels, data, chartType) {
+            var canvasJquery = $('#donutChart');
+            if (canvasJquery.length === 0) return;
+
+            var ctx = canvasJquery.get(0).getContext('2d');
+
+            // Renk Paleti
+            var colors = ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de', '#39cccc', '#605ca8'];
+
+            // Grafik Tipine Göre Ayarlar
+            var isBar = (chartType === 'bar');
+
+            var chartOptions = {
                 maintainAspectRatio : false,
                 responsive : true,
-            }
-            new Chart(donutChartCanvas, {
-                type: 'doughnut',
-                data: donutData,
-                options: donutOptions
+                legend: { display: !isBar }, // Bar ise lejantı gizle, Pasta ise göster
+                scales: {
+                    // Bar ise eksenleri aç, Pasta ise kapat
+                    xAxes: [{ display: isBar, gridLines: { display: false } }],
+                    yAxes: [{ display: isBar, ticks: { beginAtZero: true } }]
+                }
+            };
+
+            // Eski grafik varsa temizle (Tekrar çizimlerde üst üste binmemesi için)
+            if (categoryChart) categoryChart.destroy();
+
+            categoryChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ürün Sayısı',
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: chartOptions
             });
         }
     </script>

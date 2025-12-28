@@ -34,6 +34,10 @@ namespace AssetGuard.WebUI.Models
 
         // Dashboard Filtre Kategorileri için
         public List<Category> CategoryList { get; set; } = new();
+
+        // --- YENİ EKLENEN: GRAFİK TİPİ TERCİHİ ---
+        // Ayarlar sayfasından gelen "bar" veya "doughnut" bilgisini taşır.
+        public string ChartPreference { get; set; } = "doughnut";
     }
 }
 

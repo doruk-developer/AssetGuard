@@ -2,6 +2,7 @@ using AssetGuard.Business.Abstract;
 using AssetGuard.WebUI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace AssetGuard.WebUI.Controllers
 {
@@ -14,6 +15,7 @@ namespace AssetGuard.WebUI.Controllers
         private readonly IAssignmentService _assignmentService;
         private readonly IEmployeeService _employeeService;
         private readonly ICategoryService _categoryService; // Filtreler için eklendi
+        private readonly IWebHostEnvironment _env;
 
         // --- 2. CONSTRUCTOR (YAPICI METOT) - Hepsini tek seferde enjekte ediyoruz ---
         public HomeController(
@@ -21,13 +23,15 @@ namespace AssetGuard.WebUI.Controllers
             IReportService reportService,
             IAssignmentService assignmentService,
             IEmployeeService employeeService,
-            ICategoryService categoryService)
+            ICategoryService categoryService,
+            IWebHostEnvironment env)
         {
             _assetService = assetService;
             _reportService = reportService;
             _assignmentService = assignmentService;
             _employeeService = employeeService;
             _categoryService = categoryService;
+            _env = env;
         }
 
         // --- 3. INDEX ACTION (SAYFA AÇILIÞI) ---
@@ -74,6 +78,28 @@ namespace AssetGuard.WebUI.Controllers
                 // --- FÝLTRE ÝÇÝN KATEGORÝ LÝSTESÝ (ViewBag Yerine Buradan) ---
                 CategoryList = _categoryService.TGetAll()
             };
+
+            // --- YENÝ EKLENEN KISIM: AYAR DOSYASINI OKUMA ---
+            try
+            {
+                string? userName = User.Identity?.Name;
+                if (!string.IsNullOrEmpty(userName))
+                {
+                    string filePath = Path.Combine(_env.ContentRootPath, "ThemeData", $"{userName}_settings.json");
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        string jsonContent = System.IO.File.ReadAllText(filePath);
+                        // Ayarlarý çekiyoruz
+                        var settings = JsonSerializer.Deserialize<UserThemeSettings>(jsonContent);
+                        if (settings != null && !string.IsNullOrEmpty(settings.ChartType))
+                        {
+                            // Modele kullanýcýnýn tercihini basýyoruz (bar veya doughnut)
+                            model.ChartPreference = settings.ChartType;
+                        }
+                    }
+                }
+            }
+            catch { /* Hata olursa varsayýlan (doughnut) kalsýn, patlamasýn */ }
 
             // E. Kutuyu Sayfaya Gönder
             return View(model);
