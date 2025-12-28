@@ -1,60 +1,10 @@
-﻿@using AssetGuard.Entity
-@model AssetGuard.WebUI.Models.CategoryListViewModel
-
+﻿@using AssetGuard.WebUI.Models
+@model CategoryListViewModel
 @{
     ViewData["Title"] = "Kategori Yönetimi";
     Layout = "~/Views/Shared/_Layout.cshtml";
     bool isAdmin = User.IsInRole("Admin");
 }
-
-<!-- 1. CSS KÜTÜPHANELERİ (GARANTİ YÜKLEME) -->
-<link rel="stylesheet" href="~/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-<link rel="stylesheet" href="~/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-
-<style>
-    /* DataTables Oklarını Gizle */
-    table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
-    table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
-    table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
-        display: none !important;
-    }
-
-    /* Başlık Stilleri */
-    #tblCategoriesFinal thead th:not(.static-header) {
-        cursor: pointer;
-        transition: 0.2s;
-        padding: 12px 8px !important;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-    }
-
-        #tblCategoriesFinal thead th:not(.static-header):hover {
-            background-color: #f4f6f9 !important;
-            color: #007bff;
-            text-decoration: underline;
-        }
-
-    /* Statik Başlıklar */
-    .static-header {
-        cursor: default !important;
-        pointer-events: none;
-        color: #999 !important;
-    }
-
-    /* Pasif Buton Stili (User İçin) */
-    .disabled-action-btn {
-        pointer-events: none !important;
-        opacity: 0.5 !important;
-        cursor: not-allowed !important;
-        background-color: #6c757d !important;
-        border-color: #6c757d !important;
-        color: white !important;
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-        border-radius: 0.2rem;
-    }
-</style>
 
 <div class="card">
     <div class="card-header border-0">
@@ -63,48 +13,51 @@
             @if (isAdmin)
             {
                 <a href="/Category/Create" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i> Yeni Kategori Ekle
+                    <i class="fas fa-plus mr-1"></i> Yeni Kategori Ekle
                 </a>
-            }
-            else
-            {
-                <span class="disabled-action-btn">
-                    <i class="fas fa-plus"></i> Yeni Kategori Ekle
-                </span>
             }
         </div>
     </div>
 
     <div class="card-body p-0">
-        <!-- TABLO ID: tblCategoriesFinal -->
-        <table id="tblCategoriesFinal" class="table table-striped projects table-hover m-0">
+        <!-- Tablo Genişliği %100 Olarak Sabitlendi -->
+        <table id="categoryTable" class="table table-striped projects table-hover m-0" style="width:100% !important;">
             <thead>
                 <tr>
                     <th style="display:none;">ID</th>
-                    <th style="width: 70%">Kategori Adı</th>
-                    <th class="static-header text-right" style="width: 20%">İşlemler</th>
+                    @if (isAdmin)
+                    {
+                        <th style="width: 80%">KATEGORİ ADI</th>
+                        <th class="text-right" style="width: 20%">İşlemler</th>
+                    }
+                    else
+                    {
+                        <th style="width: 100%">KATEGORİ ADI</th>
+                    }
                 </tr>
             </thead>
+
             <tbody>
+                @* HATA DÜZELTİLDİ: Model üzerinden değil Model.Categories üzerinden dönüyoruz *@
                 @foreach (var item in Model.Categories)
                 {
                     <tr>
                         <td style="display:none;">@item.Id</td>
-                        <td>
+                        <td style="vertical-align: middle;">
                             <strong>@item.Name</strong>
                         </td>
-                        <td class="project-actions text-right">
-                            @if (isAdmin)
-                            {
-                                <a class="btn btn-info btn-sm" href="/Category/Edit/@item.Id"><i class="fas fa-pencil-alt"></i> Düzenle</a>
-                                <a class="btn btn-danger btn-sm" href="/Category/Delete/@item.Id" onclick="return confirm('Silmek istediğinize emin misiniz?');"><i class="fas fa-trash"></i> Sil</a>
-                            }
-                            else
-                            {
-                                <span class="disabled-action-btn"><i class="fas fa-pencil-alt"></i> Düzenle</span>
-                                <span class="disabled-action-btn"><i class="fas fa-trash"></i> Sil</span>
-                            }
-                        </td>
+
+                        @if (isAdmin)
+                        {
+                            <td class="text-right project-actions" style="vertical-align: middle;">
+                                <a href="/Category/Edit/@item.Id" class="btn btn-info btn-sm">
+                                    <i class="fas fa-pencil-alt"></i> Düzenle
+                                </a>
+                                <a href="/Category/Delete/@item.Id" class="btn btn-danger btn-sm" onclick="return confirm('Kategoriyi silmek istediğinize emin misiniz?')">
+                                    <i class="fas fa-trash"></i> Sil
+                                </a>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
@@ -126,11 +79,11 @@
                     <p class="lead text-danger font-weight-bold">@Model.ErrorInfo.ErrorMessage</p>
                     <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
                         <table class="table table-sm table-bordered table-striped">
-                            <thead><tr><th>Engelleyen Kayıtlar</th></tr></thead>
+                            <thead class="thead-light"><tr><th>İlişkili Demirbaşlar</th></tr></thead>
                             <tbody>
-                                @foreach (var item in Model.ErrorInfo.RelatedItems)
+                                @foreach (var relate in Model.ErrorInfo.RelatedItems)
                                 {
-                                    <tr><td><i class="fas fa-link text-muted mr-2"></i> @item</td></tr>
+                                    <tr><td><i class="fas fa-box text-muted mr-2"></i> @relate</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -143,35 +96,39 @@
 }
 
 @section Scripts {
-    <!-- 2. JAVASCRIPT KÜTÜPHANELERİ (GARANTİ YÜKLEME) -->
-    <script src="~/plugins/jquery/jquery.min.js"></script>
     <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
 
-    <script>
-        $(document).ready(function () {
-            // Önceki tanımları temizle
-            if ($.fn.DataTable.isDataTable('#tblCategoriesFinal')) {
-                $('#tblCategoriesFinal').DataTable().destroy();
+    <style>
+        /* 1. DataTables Sıralama Oklarını (Before/After) Tamamen Gizle */
+        table.dataTable thead .sorting:before,
+        table.dataTable thead .sorting:after,
+        table.dataTable thead .sorting_asc:before,
+        table.dataTable thead .sorting_asc:after,
+        table.dataTable thead .sorting_desc:before,
+        table.dataTable thead .sorting_desc:after {
+            display: none !important;
+        }
+
+        /* 2. Başlık Stilleri - Yazı tıklandığında hala sıralama çalışır */
+        #categoryTable thead th:not(.static-header) {
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 12px 8px !important;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+            #categoryTable thead th:not(.static-header):hover {
+                background-color: #f4f6f9 !important;
+                color: #007bff;
             }
 
-            $("#tblCategoriesFinal").DataTable({
-                "responsive": true,
-                "lengthChange": true,
-                "autoWidth": false,
-                "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" },
-                "order": [[1, "asc"]], // İsim (A-Z)
-                "columnDefs": [
-                    { "targets": [0], "visible": false }, // ID Gizle
-                    { "targets": [2], "orderable": false, "searchable": false } // İşlemleri Kapat
-                ]
-            });
-
-            // Hata varsa Modalı Aç
-            @if (Model.ErrorInfo != null)
-            {
-                <text>$('#deleteErrorModal').modal('show');</text>
-            }
-        });
-    </script>
+        /* 3. Statik Başlıklar (İşlemler gibi) */
+        .static-header {
+            cursor: default !important;
+            pointer-events: none;
+            color: #999 !important;
+        }
+    </style>
 }

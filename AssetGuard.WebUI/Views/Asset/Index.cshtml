@@ -65,23 +65,17 @@
     <div class="card-header border-0">
         <h3 class="card-title">Demirbaş Envanter Listesi</h3>
         <div class="card-tools">
-            <a href="/Asset/ExportExcel" class="btn btn-success btn-sm mr-2">
+            <!-- Excel Butonu: HERKES GÖRÜR -->
+            <a href="/Report/ExportToExcel" class="btn btn-success btn-sm mr-2">
                 <i class="fas fa-file-excel mr-1"></i> Excel'e Aktar
             </a>
 
-            <!-- ÜST BUTON AYRIMI -->
-            @if (isAdmin)
+            <!-- Yeni Giriş Butonu: SADECE ADMIN GÖRÜR (Else bloğu yok!) -->
+            @if (User.IsInRole("Admin"))
             {
                 <a href="/Asset/Create" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus"></i> Yeni Giriş
                 </a>
-            }
-            else
-            {
-                <!-- User için sönük buton -->
-                <span class="disabled-action-btn">
-                    <i class="fas fa-plus"></i> Yeni Giriş
-                </span>
             }
         </div>
     </div>
@@ -130,26 +124,33 @@
                             <span class="badge badge-@badgeColor">@status</span>
                         </td>
 
-                        <td class="project-actions text-right">
-
-                            <!--QR Kod Oluşturma Butonu-->
-                            <a href="/Asset/Details/@item.Id" class="btn btn-info btn-sm" title="QR ve Detay">
-                                <i class="fas fa-qrcode"></i> Detay
-                            </a>
-                            
-                            @if (isAdmin)
+                        <td style="vertical-align: middle;">
+                            @if (User.IsInRole("Admin"))
                             {
-                                <!-- ADMIN: Canlı Butonlar -->
-                                <a class="btn btn-primary btn-sm" href="/Asset/Edit/@item.Id"><i class="fas fa-pencil-alt"></i> Düzenle</a>
-                                <a class="btn btn-danger btn-sm" href="/Asset/Delete/@item.Id" onclick="return confirm('Silinsin mi?');"><i class="fas fa-trash"></i> Sil</a>
+                                <!-- ADMIN GÖRÜNÜMÜ: Hepsi Var, Ortalanmış Grup -->
+                                <div class="btn-group d-flex justify-content-center">
+                                    <a href="/Asset/Details/@item.Id" class="btn btn-info btn-sm" title="QR ve Detay">
+                                        <i class="fas fa-qrcode"></i> Detay
+                                    </a>
+                                    <a href="/Asset/Edit/@item.Id" class="btn btn-primary btn-sm" title="Düzenle">
+                                        <i class="fas fa-edit"></i> Düzenle
+                                    </a>
+                                    <a href="/Asset/Delete/@item.Id" class="btn btn-danger btn-sm" title="Sil">
+                                        <i class="fas fa-trash"></i> Sil
+                                    </a>
+                                </div>
                             }
                             else
                             {
-                                <!-- USER: Gri ve Tıklanamaz Buton Görünümlü Spanlar -->
-                                <span class="disabled-action-btn"><i class="fas fa-pencil-alt"></i> Düzenle</span>
-                                <span class="disabled-action-btn"><i class="fas fa-trash"></i> Sil</span>
+                                <!-- USER GÖRÜNÜMÜ: Sadece Detay, Sağa Yaslı -->
+                                <div class="float-right">
+                                    <a href="/Asset/Details/@item.Id" class="btn btn-info btn-sm" title="QR ve Detay">
+                                        <i class="fas fa-qrcode"></i> Detay
+                                    </a>
+                                </div>
                             }
                         </td>
+
                     </tr>
                 }
             </tbody>

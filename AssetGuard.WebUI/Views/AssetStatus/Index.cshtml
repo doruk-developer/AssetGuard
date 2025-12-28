@@ -4,22 +4,24 @@
 @{
     ViewData["Title"] = "Demirbaş Durumları";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Rol Kontrolü: Tek değişken üzerinden temiz yönetim
     bool isAdmin = User.IsInRole("Admin");
 }
 
-<!-- 1. CSSLERİ DOĞRUDAN BURAYA EKLİYORUZ (Garanti Olsun) -->
-<link rel="stylesheet" href="~/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
-<link rel="stylesheet" href="~/plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
-
 <style>
-    /* DataTables Oklarını Gizle */
-    table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
-    table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
-    table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
+    /* 1. DataTables Varsayılan Sıralama Oklarını (Görsel Kirliliği) Tamamen Gizle */
+    table.dataTable thead .sorting:before,
+    table.dataTable thead .sorting:after,
+    table.dataTable thead .sorting_asc:before,
+    table.dataTable thead .sorting_asc:after,
+    table.dataTable thead .sorting_desc:before,
+    table.dataTable thead .sorting_desc:after {
         display: none !important;
     }
 
-    /* Başlıklar */
+    /* 2. Başlık Stilleri - Yazı tıklandığında sıralama hala aktif kalır */
+    /* Tablo ID'si tblAssetStatusFinal olarak güncellendi */
     #tblAssetStatusFinal thead th:not(.static-header) {
         cursor: pointer;
         transition: 0.2s;
@@ -28,57 +30,49 @@
         font-size: 0.85rem;
     }
 
+        /* Üzerine gelince renk değişimi ile etkileşimi hissettirir */
         #tblAssetStatusFinal thead th:not(.static-header):hover {
             background-color: #f4f6f9 !important;
             color: #007bff;
-            text-decoration: underline;
         }
 
-    /* Statik Başlıklar */
+    /* 3. Statik Başlıklar (İşlemler sütunu gibi sıralanmayan alanlar) */
     .static-header {
         cursor: default !important;
         pointer-events: none;
         color: #999 !important;
     }
-
-    /* Pasif Buton */
-    .disabled-action-btn {
-        pointer-events: none !important;
-        opacity: 0.5 !important;
-        cursor: not-allowed !important;
-        background-color: #6c757d !important;
-        border-color: #6c757d !important;
-        color: white !important;
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-        border-radius: 0.2rem;
-    }
 </style>
 
-<div class="card">
+<div class="card shadow-none border-0">
     <div class="card-header border-0">
         <h3 class="card-title">Tanımlı Durumlar</h3>
         <div class="card-tools">
             @if (isAdmin)
             {
-                <a href="/AssetStatus/Create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Yeni Durum Ekle</a>
+                <a href="/AssetStatus/Create" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus mr-1"></i> Yeni Durum Ekle
+                </a>
             }
-            else
-            {
-                <span class="disabled-action-btn"><i class="fas fa-plus"></i> Yeni Durum Ekle</span>
-            }
+            @* User girişinde buton kirliliği yapılmaz *@
         </div>
     </div>
 
     <div class="card-body p-0">
-        <!-- ID'yi DEĞİŞTİRDİK: tblAssetStatusFinal -->
-        <table id="tblAssetStatusFinal" class="table table-striped projects table-hover m-0">
+        <!-- Tabloyu Demirbaşlar sayfasındaki gibi tam genişliğe yayıyoruz -->
+        <table id="tblAssetStatusFinal" class="table table-striped projects table-hover m-0" style="width:100% !important;">
             <thead>
                 <tr>
                     <th style="display:none;">ID</th>
-                    <th style="width: 70%">Durum Adı</th>
-                    <th class="static-header text-right" style="width: 20%">İşlemler</th>
+                    @if (isAdmin)
+                    {
+                        <th style="width: 80%">DURUM ADI</th>
+                        <th class="static-header text-right" style="width: 20%">İşlemler</th>
+                    }
+                    else
+                    {
+                        <th style="width: 100%">DURUM ADI</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -86,21 +80,24 @@
                 {
                     <tr>
                         <td style="display:none;">@item.Id</td>
-                        <td>
-                            <span class="badge badge-@item.ColorClass" style="font-size: 0.9rem;">@item.Name</span>
+                        <td style="vertical-align: middle;">
+                            <!-- Dinamik Badge: Veritabanındaki ColorClass (success, info vb.) kullanılıyor -->
+                            <span class="badge badge-@item.ColorClass" style="font-size: 0.9rem; padding: 5px 10px;">
+                                @item.Name
+                            </span>
                         </td>
-                        <td class="project-actions text-right">
-                            @if (isAdmin)
-                            {
-                                <a class="btn btn-info btn-sm" href="/AssetStatus/Edit/@item.Id"><i class="fas fa-pencil-alt"></i> Düzenle</a>
-                                <a class="btn btn-danger btn-sm" href="/AssetStatus/Delete/@item.Id" onclick="return confirm('Silmek istediğinize emin misiniz?');"><i class="fas fa-trash"></i> Sil</a>
-                            }
-                            else
-                            {
-                                <span class="disabled-action-btn"><i class="fas fa-pencil-alt"></i> Düzenle</span>
-                                <span class="disabled-action-btn"><i class="fas fa-trash"></i> Sil</span>
-                            }
-                        </td>
+
+                        @if (isAdmin)
+                        {
+                            <td class="text-right project-actions" style="vertical-align: middle;">
+                                <a class="btn btn-info btn-sm" href="/AssetStatus/Edit/@item.Id">
+                                    <i class="fas fa-pencil-alt"></i> Düzenle
+                                </a>
+                                <a class="btn btn-danger btn-sm" href="/AssetStatus/Delete/@item.Id" onclick="return confirm('Silinsin mi?');">
+                                    <i class="fas fa-trash"></i> Sil
+                                </a>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
@@ -109,30 +106,32 @@
 </div>
 
 @section Scripts {
-    <!-- 2. JAVASCRIPT KÜTÜPHANELERİNİ MANUEL EKLİYORUZ -->
-    <script src="~/plugins/jquery/jquery.min.js"></script>
     <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
 
     <script>
         $(document).ready(function () {
-            console.log("AssetStatus Tablosu Başlatılıyor..."); // Konsoldan takip et
+            // 1. VS UYARILARINI (TS1109 vb.) SUSTURMAK İÇİN GÜVENLİ PARSE
+            var isAdminRole = JSON.parse('@(isAdmin ? "true" : "false")');
 
-            // Önceki varsa sil
-            if ($.fn.DataTable.isDataTable('#tblAssetStatusFinal')) {
-                $('#tblAssetStatusFinal').DataTable().destroy();
+            // 2. Dinamik Sütun Tanımları (User/Admin farkını JS tarafında da yönetiyoruz)
+            var colDefs = [
+                { "targets": [0], "visible": false } // ID sütununu gizle
+            ];
+
+            if (isAdminRole) {
+                // Admin ise "İşlemler" (Index 2) sütununu sıralamaya kapat
+                colDefs.push({ "targets": [2], "orderable": false, "searchable": false });
             }
 
+            // 3. DataTable Başlatma
             $("#tblAssetStatusFinal").DataTable({
                 "responsive": true,
                 "lengthChange": true,
                 "autoWidth": false,
                 "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" },
                 "order": [[1, "asc"]],
-                "columnDefs": [
-                    { "targets": [0], "visible": false },
-                    { "targets": [2], "orderable": false, "searchable": false }
-                ]
+                "columnDefs": colDefs
             });
         });
     </script>

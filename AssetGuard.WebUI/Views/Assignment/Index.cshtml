@@ -62,88 +62,105 @@
 <div class="card">
     <div class="card-header border-0">
         <h3 class="card-title">Zimmet Geçmişi</h3>
+
         <div class="card-tools">
-            <!-- YENİ ZİMMET BUTONU -->
-            @if (isAdmin)
+            <!-- SADECE ADMIN GÖRÜR -->
+            @if (User.IsInRole("Admin"))
             {
-                <!-- Admin: Mavi ve Canlı -->
-                <a href="/Assignment/Create" class="btn btn-primary btn-sm">
-                    <i class="fas fa-handshake"></i> Yeni Zimmet Ata
+                <a href="/Assignment/Create" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-plus mr-1"></i> Yeni Zimmet Ata
                 </a>
             }
-            else
-            {
-                <!-- User: GRİ ve Ölü -->
-                <span class="disabled-btn">
-                    <i class="fas fa-handshake"></i> Yeni Zimmet Ata
-                </span>
-            }
         </div>
+
     </div>
     <div class="card-body p-0">
-        <table id="tblAssignments" class="table table-striped projects table-hover m-0">
+        <table id="tblAssignments" class="table table-striped projects table-hover m-0" style="width:100% !important;">
+
             <thead>
                 <tr>
-                    <th style="display:none;">ID</th> <!-- Index 0 -->
-                    <th style="width: 20%">Personel</th>
-                    <th style="width: 25%">Demirbaş</th>
-                    <th style="width: 15%">Veriliş Tarihi</th>
-                    <th style="width: 15%">İade Tarihi</th>
-                    <th style="width: 10%">Durum</th>
-                    <th class="static-header text-right" style="width: 10%">İşlem</th> <!-- Index 6 -->
+                    <th style="display:none;">ID</th>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        // Admin için 6 sütunlu dağılım
+                        <th style="width: 20%">Personel</th>
+                        <th style="width: 20%">Demirbaş</th>
+                        <th style="width: 15%">Veriliş Tarihi</th>
+                        <th style="width: 15%">İade Tarihi</th>
+                        <th style="width: 15%">Durum</th>
+                        <th class="text-right" style="width: 15%">İşlem</th>
+                    }
+                    else
+                    {
+                        // User için 5 sütunlu tam yayılım
+                        <th style="width: 25%">Personel</th>
+                        <th style="width: 25%">Demirbaş</th>
+                        <th style="width: 15%">Veriliş Tarihi</th>
+                        <th style="width: 20%">İade Tarihi</th>
+                        <th class="text-right" style="width: 15%">Durum</th>
+                        // Son sütun sağa yaslandı
+                    }
                 </tr>
             </thead>
+
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
                         <td style="display:none;">@item.Id</td>
-                        <td>@item.Employee?.FirstName @item.Employee?.LastName</td>
-                        <td>@item.Asset?.AssetName <br /> <small class="text-muted">@item.Asset?.SerialNo</small></td>
-
-                        <!-- Tarih Sıralaması (YYYYMMDD) -->
-                        <td data-order="@item.AssignmentDate.ToString("yyyyMMdd")">
-                            @item.AssignmentDate.ToString("dd.MM.yyyy")
+                        <td style="vertical-align: middle;">@item.Employee?.FirstName @item.Employee?.LastName</td>
+                        <td style="vertical-align: middle;">
+                            @item.Asset?.AssetName <br />
+                            <small class="text-muted">@item.Asset?.SerialNo</small>
                         </td>
-
-                        <td data-order="@(item.ReturnDate.HasValue? item.ReturnDate.Value.ToString("yyyyMMdd") : "0")">
+                        <td style="vertical-align: middle;">@item.AssignmentDate.ToString("dd.MM.yyyy")</td>
+                        <td style="vertical-align: middle;">
                             @(item.ReturnDate.HasValue? item.ReturnDate.Value.ToString("dd.MM.yyyy") : "-")
                         </td>
 
-                        <td>
-                            @if (item.ReturnDate == null)
-                            {
-                                <span class="badge badge-success">Aktif</span>
-                            }
-                            else
-                            {
-
-                                <span class="badge badge-secondary">İade Alındı</span>
-                            }
-                        </td>
-
-                        <td class="project-actions text-right">
-                            @if (item.ReturnDate == null)
-                            {
-                                if (isAdmin)
+                        @if (User.IsInRole("Admin"))
+                        {
+                            // Admin Görünümü: Durum ve İşlem ayrı ayrı
+                            <td style="vertical-align: middle;">
+                                @if (item.ReturnDate == null)
                                 {
-                                    <!-- ADMIN: Sarı İade Butonu -->
+                                    <span class="badge badge-success">Aktif</span>
+                                }
+                                else
+                                {
+
+                                    <span class="badge badge-secondary">İade Alındı</span>
+                                }
+                            </td>
+                            <td class="text-right project-actions" style="vertical-align: middle;">
+                                @if (item.ReturnDate == null)
+                                {
                                     <a href="/Assignment/Return/@item.Id" class="btn btn-warning btn-sm">
                                         <i class="fas fa-undo"></i> İade Al
                                     </a>
                                 }
+                            </td>
+                        }
+                        else
+                        {
+                            // User Görünümü: Durum en sağda ve sağa yaslı
+                            <td class="text-right" style="vertical-align: middle;">
+                                @if (item.ReturnDate == null)
+                                {
+                                    <span class="badge badge-success">Aktif</span>
+                                }
                                 else
                                 {
-                                    <!-- USER: GRİ İade Butonu -->
-                                    <span class="disabled-btn">
-                                        <i class="fas fa-undo"></i> İade Al
-                                    </span>
+
+                                    <span class="badge badge-secondary">İade Alındı</span>
                                 }
-                            }
-                        </td>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
+
         </table>
     </div>
 </div>

@@ -94,6 +94,48 @@
         .bg-warning {
             color: #1f2d3d !important;
         }
+
+        /* --- DARK MODE DÜZELTMELERİ (Force Override) --- */
+
+        /* 1. Input Alanları: Koyu zemin, Beyaz yazı */
+        /* .card-body ekleyerek önceliği artırıyoruz */
+        body.dark-mode .card-body .form-control,
+        body.dark-mode .modal-body .form-control,
+        body.dark-mode .custom-select,
+        body.dark-mode input.form-control,
+        body.dark-mode textarea.form-control {
+            background-color: #343a40 !important; /* Koyu Gri */
+            color: #ffffff !important; /* Beyaz Yazı */
+            border: 1px solid #6c757d !important; /* Gri Çerçeve */
+        }
+
+            /* 2. Input Odaklanınca (Focus) */
+            body.dark-mode .form-control:focus,
+            body.dark-mode .custom-select:focus {
+                background-color: #3f474e !important;
+                border-color: #007bff !important; /* Mavi Vurgu */
+                color: #ffffff !important;
+                box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25) !important;
+            }
+
+        /* 3. Tablo Satırları (Striped) */
+        body.dark-mode .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(255,255,255,0.05) !important;
+        }
+
+        /* 4. Placeholder Rengi (Silik Yazı) */
+        body.dark-mode .form-control::placeholder {
+            color: #adb5bd !important;
+            opacity: 1;
+        }
+
+        /* 5. Readonly Inputlar (Gri Görünmesin) */
+        body.dark-mode .form-control[readonly],
+        body.dark-mode .form-control:disabled {
+            background-color: #2c3034 !important;
+            opacity: 1;
+        }
+
     </style>
 </head>
 

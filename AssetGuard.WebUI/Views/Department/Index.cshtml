@@ -1,20 +1,20 @@
-﻿@model AssetGuard.WebUI.Models.DepartmentListViewModel
-
+﻿@using AssetGuard.WebUI.Models
+@model DepartmentListViewModel
 @{
     ViewData["Title"] = "Departman Yönetimi";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Rol Kontrolü (Tek merkezden yönetmek için)
     bool isAdmin = User.IsInRole("Admin");
 }
 
 <style>
-    /* DataTables Oklarını Gizle */
-    table.dataTable thead .sorting:before, table.dataTable thead .sorting:after,
-    table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_asc:after,
-    table.dataTable thead .sorting_desc:before, table.dataTable thead .sorting_desc:after {
+    /* 1. DataTables Oklarını Gizle (Daha modern bir görünüm için) */
+    table.dataTable thead .sorting:before, table.dataTable thead .sorting:after {
         display: none !important;
     }
 
-    /* Başlıklar */
+    /* 2. Başlık Stilleri */
     #tblDepartments thead th:not(.static-header) {
         cursor: pointer;
         transition: 0.2s;
@@ -26,66 +26,45 @@
         #tblDepartments thead th:not(.static-header):hover {
             background-color: #f4f6f9 !important;
             color: #007bff;
-            text-decoration: underline;
         }
 
-    #tblDepartments thead th.sorting_asc, #tblDepartments thead th.sorting_desc {
-        color: #007bff;
-        border-bottom: 2px solid #007bff !important;
-    }
-
-    /* Statik Başlıklar */
+    /* 3. Statik Başlıklar */
     .static-header {
         cursor: default !important;
         pointer-events: none;
         color: #999 !important;
     }
-
-    /* SÖNÜK BUTON STİLİ */
-    .disabled-action-btn {
-        pointer-events: none !important;
-        opacity: 0.5 !important;
-        cursor: not-allowed !important;
-        background-color: #6c757d !important;
-        border-color: #6c757d !important;
-        color: white !important;
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-        line-height: 1.5;
-        border-radius: 0.2rem;
-        text-align: center;
-        vertical-align: middle;
-        text-decoration: none;
-    }
 </style>
 
-<div class="card">
+<div class="card shadow-none border-0">
     <div class="card-header border-0">
         <h3 class="card-title">Sistem Departmanları</h3>
         <div class="card-tools">
             @if (isAdmin)
             {
                 <a href="/Department/Create" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i> Yeni Departman Ekle
+                    <i class="fas fa-plus mr-1"></i> Yeni Departman Ekle
                 </a>
             }
-            else
-            {
-                <span class="disabled-action-btn">
-                    <i class="fas fa-plus"></i> Yeni Departman Ekle
-                </span>
-            }
+            @* User girişinde burası tertemiz kalacak *@
         </div>
     </div>
 
     <div class="card-body p-0">
-        <table id="tblDepartments" class="table table-striped projects table-hover m-0">
+        <!-- Tabloyu tam genişliğe yaymak için width:100% zorlaması yapıldı -->
+        <table id="tblDepartments" class="table table-striped projects table-hover m-0" style="width:100% !important;">
             <thead>
                 <tr>
                     <th style="display:none;">ID</th>
-                    <th style="width: 80%">Departman Adı</th>
-                    <th class="static-header text-right" style="width: 20%">İşlemler</th>
+                    @if (isAdmin)
+                    {
+                        <th style="width: 80%">DEPARTMAN ADI</th>
+                        <th class="static-header text-right" style="width: 20%">İşlemler</th>
+                    }
+                    else
+                    {
+                        <th style="width: 100%">DEPARTMAN ADI</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -93,21 +72,21 @@
                 {
                     <tr>
                         <td style="display:none;">@item.Id</td>
-                        <td>
+                        <td style="vertical-align: middle;">
                             <strong>@item.Name</strong>
                         </td>
-                        <td class="project-actions text-right">
-                            @if (isAdmin)
-                            {
-                                <a class="btn btn-info btn-sm" href="/Department/Edit/@item.Id"><i class="fas fa-pencil-alt"></i> Düzenle</a>
-                                <a class="btn btn-danger btn-sm" href="/Department/Delete/@item.Id" onclick="return confirm('Bu departmanı silmek istediğinize emin misiniz?');"><i class="fas fa-trash"></i> Sil</a>
-                            }
-                            else
-                            {
-                                <span class="disabled-action-btn"><i class="fas fa-pencil-alt"></i> Düzenle</span>
-                                <span class="disabled-action-btn"><i class="fas fa-trash"></i> Sil</span>
-                            }
-                        </td>
+
+                        @if (isAdmin)
+                        {
+                            <td class="text-right project-actions" style="vertical-align: middle;">
+                                <a href="/Department/Edit/@item.Id" class="btn btn-info btn-sm">
+                                    <i class="fas fa-pencil-alt"></i> Düzenle
+                                </a>
+                                <a href="/Department/Delete/@item.Id" class="btn btn-danger btn-sm" onclick="return confirm('Silinsin mi?')">
+                                    <i class="fas fa-trash"></i> Sil
+                                </a>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
@@ -127,13 +106,13 @@
                 </div>
                 <div class="modal-body" style="background-color: white; color: black;">
                     <p class="lead text-danger font-weight-bold">@Model.ErrorInfo.ErrorMessage</p>
-                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <div class="table-responsive" style="max-height: 250px;">
                         <table class="table table-sm table-bordered table-striped">
-                            <thead><tr><th>Bağlı Personeller</th></tr></thead>
+                            <thead class="thead-light"><tr><th>İlişkili Personeller</th></tr></thead>
                             <tbody>
-                                @foreach (var item in Model.ErrorInfo.RelatedItems)
+                                @foreach (var relate in Model.ErrorInfo.RelatedItems)
                                 {
-                                    <tr><td><i class="fas fa-user text-muted mr-2"></i> @item</td></tr>
+                                    <tr><td><i class="fas fa-user text-muted mr-2"></i> @relate</td></tr>
                                 }
                             </tbody>
                         </table>
@@ -146,20 +125,33 @@
 }
 
 @section Scripts {
+    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+
     <script>
         $(document).ready(function () {
+            // 1. VS UYARILARINI ENGELLEMEK İÇİN GÜVENLİ PARSE
+            var isAdminRole = JSON.parse('@(isAdmin ? "true" : "false")');
+            var hasError = JSON.parse('@(Model.ErrorInfo != null ? "true" : "false")');
+
+            // 2. Dinamik Sütun Ayarı
+            var colDefinitions = [{ "targets": [0], "visible": false }];
+            if (isAdminRole) {
+                colDefinitions.push({ "targets": [2], "orderable": false });
+            }
+
+            // 3. DataTable Başlatma
             $("#tblDepartments").DataTable({
-                "responsive": true, "autoWidth": false,
+                "responsive": true,
+                "lengthChange": true,
+                "autoWidth": false,
                 "language": { "url": "https://cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" },
-                "order": [[1, "asc"]],
-                "columnDefs": [
-                    { "targets": [0], "visible": false },
-                    { "targets": [2], "orderable": false, "searchable": false }
-                ]
+                "columnDefs": colDefinitions
             });
-            @if (Model.ErrorInfo != null)
-            {
-                <text>$('#deleteErrorModal').modal('show');</text>
+
+            // 4. Modal Tetikleme
+            if (hasError) {
+                $('#deleteErrorModal').modal('show');
             }
         });
     </script>
