@@ -1,8 +1,10 @@
-﻿namespace AssetGuard.Entity;
+﻿using AssetGuard.Entity.Base;
 
-public partial class Employee
+namespace AssetGuard.Entity;
+
+public class Employee : BaseEntity // BaseEntity sınıfından miras al
 {
-    public int Id { get; set; }
+    // public int Id { get; set; } artık BaseEntity tarafından sağlanıyor
 
     public string FirstName { get; set; } = null!;
 

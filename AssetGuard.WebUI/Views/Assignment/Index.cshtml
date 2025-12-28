@@ -102,8 +102,8 @@
                         <td>@item.Asset?.AssetName <br /> <small class="text-muted">@item.Asset?.SerialNo</small></td>
 
                         <!-- Tarih Sıralaması (YYYYMMDD) -->
-                        <td data-order="@item.AssignedDate.ToString("yyyyMMdd")">
-                            @item.AssignedDate.ToString("dd.MM.yyyy")
+                        <td data-order="@item.AssignmentDate.ToString("yyyyMMdd")">
+                            @item.AssignmentDate.ToString("dd.MM.yyyy")
                         </td>
 
                         <td data-order="@(item.ReturnDate.HasValue? item.ReturnDate.Value.ToString("yyyyMMdd") : "0")">

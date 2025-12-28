@@ -97,7 +97,7 @@ namespace AssetGuard.WebUI.Controllers
                 // Engelleyen zimmet kayıtlarını detaylarıyla birlikte çekiyoruz
                 var relatedAssignments = _assignmentService.TGetAllWithDetails()
                                          .Where(x => x.EmployeeId == id)
-                                         .Select(x => x.Asset?.AssetName + " (Tarih: " + x.AssignedDate.ToString("dd.MM.yyyy") + ")")
+                                         .Select(x => x.Asset?.AssetName + " (Tarih: " + x.AssignmentDate.ToString("dd.MM.yyyy") + ")")
                                          .ToList();
 
                 var model = new EmployeeListViewModel

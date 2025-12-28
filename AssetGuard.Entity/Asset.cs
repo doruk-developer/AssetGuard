@@ -1,8 +1,10 @@
-﻿namespace AssetGuard.Entity;
+﻿using AssetGuard.Entity.Base;
 
-public partial class Asset
+namespace AssetGuard.Entity;
+
+public partial class Asset : BaseEntity
 {
-    public int Id { get; set; }
+    // public int Id { get; set; } artık BaseEntity tarafından sağlanıyor
 
     public string AssetName { get; set; } = null!;
 

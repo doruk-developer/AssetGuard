@@ -1,5 +1,5 @@
 {
   "SidebarColor": "danger",
   "IsDarkMode": false,
-  "ChartType": "doughnut"
+  "ChartType": "bar"
 }

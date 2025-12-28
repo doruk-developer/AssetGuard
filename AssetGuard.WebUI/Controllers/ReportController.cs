@@ -106,7 +106,7 @@ namespace AssetGuard.WebUI.Controllers
                             worksheet.Cell(i + 2, 1).Value = zimmetData[i].Employee?.FirstName + " " + zimmetData[i].Employee?.LastName;
                             worksheet.Cell(i + 2, 2).Value = zimmetData[i].Employee?.Department?.Name ?? "-";
                             worksheet.Cell(i + 2, 3).Value = zimmetData[i].Asset?.AssetName;
-                            worksheet.Cell(i + 2, 4).Value = zimmetData[i].AssignedDate.ToString("dd.MM.yyyy");
+                            worksheet.Cell(i + 2, 4).Value = zimmetData[i].AssignmentDate.ToString("dd.MM.yyyy");
                         }
                         break;
 

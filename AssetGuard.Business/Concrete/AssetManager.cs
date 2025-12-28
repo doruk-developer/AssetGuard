@@ -81,6 +81,11 @@ namespace AssetGuard.Business.Concrete
             return _assetDal.GetAll();
         }
 
+        public Asset? GetBySerialNo(string serialNo)
+        {
+            return _assetDal.GetAll().FirstOrDefault(x => x.SerialNo == serialNo && !x.IsDeleted);
+        }
+
         public string GenerateQrCode(string detailUrl)
         {
             using (QRCodeGenerator qrGenerator = new QRCodeGenerator())

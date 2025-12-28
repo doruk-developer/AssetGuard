@@ -13,7 +13,7 @@
     </div>
 
     <!-- enctype="multipart/form-data" olmadan resim yüklenemez! -->
-    <form asp-action="Create" method="post" enctype="multipart/form-data">
+    <form id="frmSave" asp-action="Create" method="post" enctype="multipart/form-data">
         <div class="card-body">
 
             <div class="row">
@@ -85,7 +85,7 @@
         </div>
 
         <div class="card-footer">
-            <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Kaydet</button>
+            <button type="button" onclick="saveAsset()" class="btn btn-success"><i class="fas fa-save"></i> Kaydet</button>
             <a href="/Asset/Index" class="btn btn-secondary">İptal</a>
         </div>
     </form>
@@ -110,5 +110,23 @@
                 }
             });
         });
+
+        function saveAsset(){
+            $.ajax({
+                url: '/Asset/Create',
+                type: 'POST',
+                data: $("#frmSave").serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error('Sunucu iletişim hatası.');
+                }
+            });
+        }           
     </script>
 }

@@ -25,7 +25,7 @@ namespace AssetGuard.DataAccess.Concrete
             return _context.Assignments
                 .Include(x => x.Asset)
                 .Include(x => x.Employee)
-                .OrderByDescending(x => x.AssignedDate) // En son yapılan zimmet en üstte
+                .OrderByDescending(x => x.AssignmentDate) // En son yapılan zimmet en üstte
                 .ToList();
         }
     }

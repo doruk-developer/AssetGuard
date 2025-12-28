@@ -47,7 +47,7 @@ namespace AssetGuard.WebUI.Controllers
         public IActionResult Create(AssignmentAddViewModel model)
         {
             // 1. Zimmet tarihini şu an olarak ayarla
-            model.Assignment.AssignedDate = DateTime.Now;
+            model.Assignment.AssignmentDate = DateTime.Now;
 
             // 2. Servisi kullanarak veritabanına kaydet
             _assignmentService.TAdd(model.Assignment);

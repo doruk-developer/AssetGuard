@@ -62,21 +62,30 @@ namespace AssetGuard.WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(AssetAddViewModel model)
         {
+            var res = new { Success = true, Message = "" };
+
             // --- VALİDASYON BAŞLANGIÇ ---
             ValidationResult result = await _assetValidator.ValidateAsync(model.Asset);
 
             if (!result.IsValid)
             {
+                List<string> errors = new List<string>();
+
                 foreach (var error in result.Errors)
                 {
                     // View tarafında asp-for="Asset.AssetName" olduğu için prefix ekliyoruz
                     ModelState.AddModelError("Asset." + error.PropertyName, error.ErrorMessage);
+                    errors.Add(error.ErrorMessage);
                 }
 
                 // Hata durumunda Dropdownları tekrar doldur
                 model.CategoryList = _categoryService.TGetAll();
                 model.StatusList = _assetStatusService.TGetAll();
-                return View(model);
+                //return View(model);
+
+                res = new { Success = false, Message = "Garanti tarihi, satın alma tarihinden eski olamaz" };
+
+                return Ok(res);
             }
             // --- VALİDASYON BİTİŞ ---
 
@@ -93,11 +102,24 @@ namespace AssetGuard.WebUI.Controllers
                 model.Asset.ImageUrl = newImageName;
             }
 
+            var existingAsset = _assetService.GetBySerialNo(model.Asset.SerialNo);
+            if (existingAsset != null)
+            {
+                TempData["Error"] = "Bu seri numarası zaten kullanılmakta.";
+                //return RedirectToAction("Index");
+                res = new { Success = false, Message = "Bu seri numarası zaten kullanılmakta." };
+
+                return Ok(res);
+            }
+
             _assetService.TAdd(model.Asset);
 
             // Toast vasıtasıyla başarılı ekleme bildirimi (TempData kullanarak)
             TempData["Success"] = "Yeni demirbaş envantere başarıyla kaydedildi.";
-            return RedirectToAction("Index");
+            //return RedirectToAction("Index");
+            res = new { Success = true, Message = "Yeni demirbaş envantere başarıyla kaydedildi." };
+
+            return Ok(res);
         }
 
         [Authorize(Roles = "Admin")]

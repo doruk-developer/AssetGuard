@@ -1,6 +1,7 @@
 ﻿namespace AssetGuard.Entity;
+using AssetGuard.Entity.Base;
 
-public partial class Department
+public class Department : BaseEntity // BaseEntity sınıfından miras al
 {
     public int Id { get; set; }
 

@@ -19,7 +19,7 @@ namespace AssetGuard.Business.Abstract
         List<Asset> TGetAssetsExpiringSoon(int days); // Garanti Raporu
         List<Asset> TGetAssetsByStatus(string statusName); // Arıza Raporu
         List<Asset> TGetAllWithDetails(); // Mali Rapor (ve Arıza için de lazım)
-
+        Asset? GetBySerialNo(string serialNo);
         string GenerateQrCode(string detailUrl);
 
         // Dashboard için filtreli veri getiren metot

@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema; // Bu kütüphane şart
+﻿using AssetGuard.Entity.Base;
+using System.ComponentModel.DataAnnotations.Schema; // Bu kütüphane şart
 
 namespace AssetGuard.Entity
 {
     [Table("AssetStatus")] // <-- İŞTE KİLİT NOKTA: Tablo adını sabitliyoruz.
-    public partial class AssetStatus
+    public class AssetStatus : BaseEntity
     {
         public int Id { get; set; }
 

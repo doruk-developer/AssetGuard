@@ -15,6 +15,8 @@ using Microsoft.Data.SqlClient; // Baðlantý testi için gerekli
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+// Veritabaný katmanýnda "Kim giriþ yaptý?" bilgisini okuyabilmek için:
+builder.Services.AddHttpContextAccessor();
 
 // =========================================================
 // 1. AKILLI BAÐLANTI SEÇÝCÝ (AUTO-DISCOVERY)

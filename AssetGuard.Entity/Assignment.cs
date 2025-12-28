@@ -1,6 +1,8 @@
 ﻿namespace AssetGuard.Entity;
 
-public partial class Assignment
+using AssetGuard.Entity.Base;
+
+public class Assignment : BaseEntity // BaseEntity sınıfından miras al
 {
     public int Id { get; set; }
 
@@ -8,7 +10,7 @@ public partial class Assignment
 
     public int AssetId { get; set; }
 
-    public DateTime AssignedDate { get; set; }
+    public DateTime AssignmentDate { get; set; }
 
     public DateTime? ReturnDate { get; set; }
 

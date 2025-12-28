@@ -32,6 +32,7 @@ namespace AssetGuard.DataAccess.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ThemeSettingsJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -59,7 +60,12 @@ namespace AssetGuard.DataAccess.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ColorClass = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ColorClass = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -72,7 +78,12 @@ namespace AssetGuard.DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,7 +96,12 @@ namespace AssetGuard.DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -202,30 +218,37 @@ namespace AssetGuard.DataAccess.Migrations
                 name: "Assets",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AssetName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    SerialNo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    CategoryID = table.Column<int>(type: "int", nullable: false),
-                    StatusID = table.Column<int>(type: "int", nullable: false),
+                    AssetName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SerialNo = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    StatusId = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getdate())"),
-                    ImageUrl = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    WarrantyEndDate = table.Column<DateTime>(type: "datetime", nullable: true)
+                    PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    WarrantyEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Assets__3214EC27DA32BCBB", x => x.ID);
+                    table.PrimaryKey("PK_Assets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Assets_Categories",
-                        column: x => x.CategoryID,
-                        principalTable: "Categories",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Assets_Status",
-                        column: x => x.StatusID,
+                        name: "FK_Assets_AssetStatus_StatusId",
+                        column: x => x.StatusId,
                         principalTable: "AssetStatus",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Assets_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -237,7 +260,12 @@ namespace AssetGuard.DataAccess.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -260,7 +288,12 @@ namespace AssetGuard.DataAccess.Migrations
                     AssetId = table.Column<int>(type: "int", nullable: false),
                     AssignedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ReturnDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -269,7 +302,7 @@ namespace AssetGuard.DataAccess.Migrations
                         name: "FK_Assignments_Assets_AssetId",
                         column: x => x.AssetId,
                         principalTable: "Assets",
-                        principalColumn: "ID",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Assignments_Employees_EmployeeId",
@@ -319,20 +352,20 @@ namespace AssetGuard.DataAccess.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Assets_CategoryID",
+                name: "IX_Assets_CategoryId",
                 table: "Assets",
-                column: "CategoryID");
+                column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Assets_StatusID",
-                table: "Assets",
-                column: "StatusID");
-
-            migrationBuilder.CreateIndex(
-                name: "UQ__Assets__SerialNo",
+                name: "IX_Assets_SerialNo",
                 table: "Assets",
                 column: "SerialNo",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Assets_StatusId",
+                table: "Assets",
+                column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Assignments_AssetId",
@@ -384,10 +417,10 @@ namespace AssetGuard.DataAccess.Migrations
                 name: "Employees");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "AssetStatus");
 
             migrationBuilder.DropTable(
-                name: "AssetStatus");
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Departments");
