@@ -16,5 +16,8 @@ namespace AssetGuard.WebUI.Models
         [Display(Name = "Yeni Şifre Tekrar")]
         [Compare("NewPassword", ErrorMessage = "Şifreler uyuşmuyor!")]
         public string ConfirmPassword { get; set; }
+
+        // Varsayılan olarak 'view' (Görünüm) sekmesi açılsın. Şifre değiştirme hata mesajı için.
+        public string ActiveTab { get; set; } = "view";
     }
 }

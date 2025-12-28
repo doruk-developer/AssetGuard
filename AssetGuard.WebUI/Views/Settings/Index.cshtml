@@ -7,7 +7,10 @@
 @{
     ViewData["Title"] = "Sistem ve Panel Ayarları";
 
-    // --- MEVCUT AYARLARI OKU ---
+    // 1. Sekme Durumunu Belirle (Controller'dan gelen bilgiye göre)
+    string activeTab = Model?.ActiveTab ?? "view";
+
+    // 2. Mevcut Ayarları Dosyadan Oku
     var currentSettings = new UserThemeSettings();
     try
     {
@@ -30,24 +33,31 @@
 
 <div class="row">
     <div class="col-md-12">
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success alert-dismissible"><button class="close" data-dismiss="alert">×</button>@TempData["SuccessMessage"]</div>
-        }
+
+        <!-- BÜYÜK ALERT KUTULARI BURADAN SİLİNDİ. SADECE TOASTR ÇALIŞACAK. -->
 
         <div class="card card-primary card-outline card-tabs">
             <div class="card-header p-0 pt-1 border-bottom-0">
                 <ul class="nav nav-tabs" id="settingsTab" role="tablist">
-                    <li class="nav-item"><a class="nav-link active" data-toggle="pill" href="#tab-view">Görünüm</a></li>
-                    <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#tab-dashboard">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" data-toggle="pill" href="#tab-security">Güvenlik</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link @(activeTab == "view" ? "active" : "")"
+                           id="view-tab" data-toggle="pill" href="#tab-view" role="tab">Görünüm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(activeTab == "dashboard" ? "active" : "")"
+                           id="dashboard-tab" data-toggle="pill" href="#tab-dashboard" role="tab">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(activeTab == "security" ? "active" : "")"
+                           id="security-tab" data-toggle="pill" href="#tab-security" role="tab">Güvenlik</a>
+                    </li>
                 </ul>
             </div>
             <div class="card-body">
                 <div class="tab-content">
 
                     <!-- 1. GÖRÜNÜM AYARLARI -->
-                    <div class="tab-pane fade show active" id="tab-view">
+                    <div class="tab-pane fade @(activeTab == "view" ? "show active" : "")" id="tab-view" role="tabpanel">
                         <div class="form-group">
                             <label>Sidebar Rengi (Anlık Önizleme)</label>
                             <select class="form-control col-md-4" id="sidebarColorSelector">
@@ -76,7 +86,7 @@
                     </div>
 
                     <!-- 2. DASHBOARD -->
-                    <div class="tab-pane fade" id="tab-dashboard">
+                    <div class="tab-pane fade @(activeTab == "dashboard" ? "show active" : "")" id="tab-dashboard" role="tabpanel">
                         <div class="form-group">
                             <label>Grafik Tipi</label><br />
                             <div class="custom-control custom-radio d-inline mr-3">
@@ -92,11 +102,25 @@
                     </div>
 
                     <!-- 3. GÜVENLİK -->
-                    <div class="tab-pane fade" id="tab-security">
+                    <div class="tab-pane fade @(activeTab == "security" ? "show active" : "")" id="tab-security" role="tabpanel">
                         <form asp-action="ChangePassword" method="post">
-                            <div class="form-group"><label>Mevcut Şifre</label><input asp-for="CurrentPassword" type="password" class="form-control" required /></div>
-                            <div class="form-group"><label>Yeni Şifre</label><input asp-for="NewPassword" type="password" class="form-control" required /></div>
-                            <div class="form-group"><label>Tekrar</label><input asp-for="ConfirmPassword" type="password" class="form-control" required /></div>
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <div class="form-group">
+                                <label>Mevcut Şifre</label>
+                                <input asp-for="CurrentPassword" type="password" class="form-control" required />
+                                <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Yeni Şifre</label>
+                                <input asp-for="NewPassword" type="password" class="form-control" required />
+                                <span asp-validation-for="NewPassword" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>Tekrar</label>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control" required />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
                             <button type="submit" class="btn btn-primary">Değiştir</button>
                         </form>
                     </div>
@@ -108,9 +132,8 @@
 
 @section Scripts {
     <script>
-        var dbSettings = @Html.Raw(jsonSettingsInit);
+        var dbSettings = JSON.parse('@Html.Raw(jsonSettingsInit)');
 
-        // Renk Haritası (JS Tarafı için)
         var colorMap = {
             'primary': '#007bff', 'secondary': '#6c757d', 'success': '#28a745',
             'danger': '#dc3545', 'warning': '#ffc107', 'info': '#17a2b8',
@@ -119,40 +142,35 @@
         };
 
         $(document).ready(function () {
-            // Açılışta Inputları Doldur
+            // Ayarları Doldur
             if (dbSettings.SidebarColor) $('#sidebarColorSelector').val(dbSettings.SidebarColor);
             if (dbSettings.IsDarkMode) $('#darkModeSwitch').prop('checked', true);
             if (dbSettings.ChartType) $('input[name="chartPref"][value="' + dbSettings.ChartType + '"]').prop('checked', true);
 
-            // --- CANLI ÖNİZLEME (LIVE PREVIEW) MANTIĞI ---
-
-            // 1. Sidebar Renk Değişimi
+            // Sidebar Rengi Değişimi
             $('#sidebarColorSelector').change(function() {
                 var colorKey = $(this).val();
                 var sidebar = $('.main-sidebar');
                 var brand = $('.brand-link');
 
                 if (colorKey !== 'default' && colorMap[colorKey]) {
-                    // Rengi Uygula
                     var styleAttr = 'background-color: ' + colorMap[colorKey] + ' !important';
                     sidebar.attr('style', styleAttr);
                     brand.attr('style', styleAttr);
 
-                    // Yazı Rengini Ayarla (Açık renkse yazılar koyu olsun)
                     if (['white', 'warning', 'teal', 'light'].includes(colorKey)) {
                          sidebar.removeClass('sidebar-dark-primary').addClass('sidebar-light-primary');
                     } else {
                          sidebar.removeClass('sidebar-light-primary').addClass('sidebar-dark-primary');
                     }
                 } else {
-                    // Varsayılana Dön (Style'ı sil)
                     sidebar.removeAttr('style');
                     brand.removeAttr('style');
                     sidebar.removeClass('sidebar-light-primary').addClass('sidebar-dark-primary');
                 }
             });
 
-            // 2. Dark Mode Toggle
+            // Dark Mode Değişimi
             $('#darkModeSwitch').change(function() {
                 var isChecked = $(this).is(':checked');
                 var body = $('body');
@@ -168,7 +186,6 @@
             });
         });
 
-        // --- KAYDETME FONKSİYONU (Sadece bu çağrıldığında dosya değişir) ---
         function saveToDisk() {
             var newSettings = {
                 sidebarColor: $('#sidebarColorSelector').val(),
@@ -184,8 +201,6 @@
                 success: function (response) {
                     if (response.success) {
                         toastr.success('Ayarlar başarıyla kaydedildi!');
-                        // Sayfayı yenilemeye gerek yok, zaten önizleme aktif.
-                        // Ama dosyadan emin olmak için 1 sn sonra yenileyebilirsin istersen.
                     } else {
                         toastr.error('Hata: ' + response.message);
                     }

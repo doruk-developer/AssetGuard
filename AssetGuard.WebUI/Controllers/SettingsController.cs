@@ -24,7 +24,8 @@ namespace AssetGuard.WebUI.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            return View();
+            // Sayfa ilk açıldığında varsayılan sekmeyle (view) açılması için boş model gönderiyoruz.
+            return View(new ChangePasswordViewModel());
         }
 
         [HttpPost]
@@ -35,16 +36,14 @@ namespace AssetGuard.WebUI.Controllers
                 var userName = User.Identity?.Name;
                 if (string.IsNullOrEmpty(userName)) return Json(new { success = false, message = "Kullanıcı tanınamadı." });
 
-                // 1. Klasör Yolu (Güvenli Erişim)
+                // 1. Klasör Yolu
                 string folderPath = Path.Combine(_env.ContentRootPath, "ThemeData");
-
-                // Klasör yoksa oluştur (Hata önleyici)
                 if (!Directory.Exists(folderPath))
                 {
                     Directory.CreateDirectory(folderPath);
                 }
 
-                // 2. Dosya Yolu: kullanıcıadı_settings.json
+                // 2. Dosya Yolu
                 string filePath = Path.Combine(folderPath, $"{userName}_settings.json");
 
                 // 3. Yazma İşlemi
@@ -55,25 +54,50 @@ namespace AssetGuard.WebUI.Controllers
             }
             catch (Exception ex)
             {
-                // Hata loglanabilir ama kullanıcıya basit mesaj dönüyoruz
                 return Json(new { success = false, message = "Dosya yazma hatası: " + ex.Message });
             }
         }
 
-        // ... ChangePassword metodun buraya gelecek (değişiklik yok) ...
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            if (!ModelState.IsValid) { return View("Index", model); }
+            // Hata olsa da olmasa da bu bir "security" sekmesi işlemidir.
+            model.ActiveTab = "security";
+
+            if (!ModelState.IsValid)
+            {
+                return View("Index", model);
+            }
+
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
             var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
             if (result.Succeeded)
             {
                 await _signInManager.RefreshSignInAsync(user);
-                TempData["SuccessMessage"] = "Şifre güncellendi.";
-                return RedirectToAction("Index");
+                TempData["SuccessMessage"] = "Şifreniz başarıyla güncellendi!";
+                // Başarı durumunda inputlar temizlensin ama yine bu sekmede kalsın
+                return View("Index", new ChangePasswordViewModel { ActiveTab = "security" });
             }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    if (error.Code == "PasswordMismatch")
+                    {
+                        // İstediğin özel hata mesajı
+                        TempData["ErrorMessage"] = "Mevcut şifre hatalı girilmiştir. Lütfen doğru giriş sağlayınız.";
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+            }
+
             return View("Index", model);
         }
     }
