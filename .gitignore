@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/AssetGuard.WebUI/Program.cs
+/AssetGuard.WebUI/appsettings.json
+/AssetGuard.DataAccess/Migrations/ZimmetContextModelSnapshot.cs
+/.gitignore
+/AssetGuard.DataAccess/Migrations/20251227122040_InitialSetup.cs
+*.cs
+/AssetGuard.DataAccess/Migrations/20251227122040_InitialSetup.Designer.cs
+/AssetGuard.DataAccess/Migrations/20251227122040_InitialSetup.cs
+/AssetGuard.DataAccess/Migrations/20251227122040_InitialSetup.Designer.cs
+/.gitignore

@@ -205,7 +205,7 @@ namespace AssetGuard.DataAccess.Migrations
                     b.Property<int>("AssetId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("AssignedDate")
+                    b.Property<DateTime>("AssignmentDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedBy")
