@@ -80,7 +80,7 @@ namespace AssetGuard.WebUI.Controllers
             return View(reportData);
         }
 
-        public IActionResult ExportReportExcel(string type)
+        public IActionResult ExportToExcel(string type = "mali")
         {
             using (var workbook = new XLWorkbook())
             {
